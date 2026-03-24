@@ -1,0 +1,7 @@
+Chào {{ user.username }},
+
+Đơn hàng của bạn đã được tiếp nhận thành công.
+Cảm ơn bạn đã ủng hộ TECH STORE.
+
+Trân trọng,
+Tech Store
