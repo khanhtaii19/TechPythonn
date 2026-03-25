@@ -4,27 +4,316 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ title }} - TechStore</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    
     <style>
-        :root { --main-blue: #00a8ff; --dark-blue: #001d3d; }
-        body { font-family: 'Inter', sans-serif; background-color: #f8f9fa; }
-        .navbar { background-color: var(--dark-blue) !important; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
-        .navbar-brand { font-weight: 800; color: var(--main-blue) !important; }
-        .btn-primary { background-color: var(--main-blue); border: none; }
-        .btn-primary:hover { background-color: #0097e6; transform: translateY(-2px); }
-        .card { border: none; border-radius: 12px; transition: 0.3s; }
-        .card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
-        .price-tag { color: #d70018; font-weight: 700; font-size: 1.1rem; }
-        footer { background: var(--dark-blue); color: #ecf0f1; padding: 40px 0; margin-top: 50px; }
-        footer a { color: #bdc3c7; text-decoration: none; transition: 0.2s; }
-        footer a:hover { color: var(--main-blue); }
+        :root {
+            --accent: #ff4d1c;
+            --accent2: #ff8c42;
+            --dark: #0a0a0f;
+            --dark2: #111118;
+            --dark3: #1a1a24;
+            --card-bg: #16161e;
+            --border: rgba(255,255,255,0.07);
+            --text: #e8e8f0;
+            --muted: #7a7a8c;
+            --white: #ffffff;
+            --gradient: linear-gradient(135deg, #ff4d1c 0%, #ff8c42 100%);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--dark);
+            color: var(--text);
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, h4, h5, h6, .navbar-brand {
+            font-family: 'Syne', sans-serif;
+        }
+
+        /* ===== SCROLLBAR ===== */
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: var(--dark2); }
+        ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
+
+        /* ===== NAVBAR ===== */
+        .navbar {
+            background: rgba(10,10,15,0.85) !important;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            padding: 12px 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar-brand {
+            font-weight: 800;
+            font-size: 1.4rem;
+            letter-spacing: -0.5px;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .navbar-brand i { 
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+        }
+
+        .search-wrap {
+            position: relative;
+            flex: 1;
+            max-width: 420px;
+            margin: 0 2rem;
+        }
+
+        .search-wrap input {
+            background: var(--dark3);
+            border: 1px solid var(--border);
+            border-radius: 50px;
+            color: var(--text);
+            padding: 9px 48px 9px 20px;
+            width: 100%;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+
+        .search-wrap input::placeholder { color: var(--muted); }
+
+        .search-wrap input:focus {
+            outline: none;
+            border-color: var(--accent);
+            background: var(--dark2);
+            box-shadow: 0 0 0 3px rgba(255,77,28,0.15);
+        }
+
+        .search-wrap button {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--gradient);
+            border: none;
+            border-radius: 50px;
+            color: white;
+            padding: 5px 14px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .search-wrap button:hover { opacity: 0.85; }
+
+        .nav-actions { display: flex; align-items: center; gap: 12px; }
+
+        .cart-btn {
+            position: relative;
+            background: var(--dark3);
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            width: 42px; height: 42px;
+            display: flex; align-items: center; justify-content: center;
+            color: var(--text);
+            text-decoration: none;
+            transition: all 0.25s;
+        }
+
+        .cart-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: rgba(255,77,28,0.1);
+        }
+
+        .cart-badge {
+            position: absolute;
+            top: -4px; right: -4px;
+            background: var(--accent);
+            color: white;
+            border-radius: 50%;
+            width: 18px; height: 18px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Syne', sans-serif;
+        }
+
+        .btn-login {
+            color: var(--muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.2s;
+            padding: 0 4px;
+        }
+
+        .btn-login:hover { color: var(--white); }
+
+        .btn-register {
+            background: var(--gradient);
+            color: white !important;
+            border: none;
+            border-radius: 50px;
+            padding: 8px 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            font-family: 'Syne', sans-serif;
+            text-decoration: none;
+            transition: opacity 0.2s, transform 0.2s;
+            display: inline-block;
+        }
+
+        .btn-register:hover { opacity: 0.85; transform: translateY(-1px); }
+
+        /* User dropdown */
+        .user-dropdown .dropdown-toggle {
+            background: var(--dark3);
+            border: 1px solid var(--border);
+            color: var(--text);
+            border-radius: 50px;
+            padding: 7px 16px 7px 12px;
+            font-size: 0.875rem;
+            cursor: pointer;
+            display: flex; align-items: center; gap: 8px;
+            text-decoration: none;
+            transition: border-color 0.2s;
+        }
+
+        .user-dropdown .dropdown-toggle:hover { border-color: var(--accent); }
+
+        .user-avatar {
+            width: 24px; height: 24px;
+            background: var(--gradient);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        .dropdown-menu {
+            background: var(--dark3);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 6px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            margin-top: 8px;
+        }
+
+        .dropdown-item {
+            color: var(--text);
+            border-radius: 8px;
+            padding: 8px 14px;
+            font-size: 0.875rem;
+            transition: all 0.15s;
+        }
+
+        .dropdown-item:hover {
+            background: rgba(255,77,28,0.12);
+            color: var(--accent);
+        }
+
+        /* ===== FLASH MESSAGES ===== */
+        .flash-container { margin: 16px 0 0; }
+
+        .alert {
+            background: var(--dark3);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--text);
+            padding: 12px 18px;
+            font-size: 0.9rem;
+        }
+
+        .alert-info, .alert-message {
+            border-left: 3px solid var(--accent);
+        }
+
+        .alert-success {
+            border-left: 3px solid #22c55e;
+            background: rgba(34,197,94,0.06);
+        }
+
+        .alert-danger {
+            border-left: 3px solid #ef4444;
+            background: rgba(239,68,68,0.06);
+        }
+
+        .btn-close { filter: invert(1); opacity: 0.5; }
+        .btn-close:hover { opacity: 1; }
+
+        /* ===== MAIN CONTENT ===== */
+        .main-content {
+            min-height: calc(100vh - 70px);
+            padding-bottom: 60px;
+        }
+
+        /* ===== FOOTER ===== */
+        footer {
+            background: var(--dark2);
+            border-top: 1px solid var(--border);
+            padding: 50px 0 30px;
+            margin-top: 60px;
+        }
+
+        footer h5, footer h6 {
+            color: var(--white);
+            margin-bottom: 14px;
+        }
+
+        footer p, footer li { font-size: 0.875rem; color: var(--muted); }
+        footer ul { list-style: none; padding: 0; }
+        footer ul li { margin-bottom: 8px; }
+        footer a { color: var(--muted); text-decoration: none; transition: color 0.2s; }
+        footer a:hover { color: var(--accent); }
+
+        .footer-brand {
+            font-size: 1.3rem;
+            font-weight: 800;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        footer hr { border-color: var(--border); margin: 24px 0 20px; }
+
+        .footer-bottom {
+            font-size: 0.8rem;
+            color: var(--muted);
+            text-align: center;
+        }
+
+        /* ===== UTILITY ===== */
+        .price-tag { color: var(--accent); font-weight: 700; }
+
+        /* Bootstrap overrides */
+        .btn-primary {
+            background: var(--gradient);
+            border: none;
+            font-family: 'Syne', sans-serif;
+            font-weight: 600;
+            transition: opacity 0.2s, transform 0.2s;
+        }
+
+        .btn-primary:hover { opacity: 0.85; transform: translateY(-1px); background: var(--gradient); border: none; }
+
+        .navbar-toggler { border-color: var(--border); }
+        .navbar-toggler-icon { filter: invert(1); }
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+    <nav class="navbar navbar-expand-lg">
         <div class="container">
             <a class="navbar-brand" href="{{ url_for('main.index') }}">
                 <i class="fa-solid fa-microchip me-2"></i>TECH STORE
@@ -33,71 +322,91 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
-                <form class="d-flex mx-auto w-50" action="{{ url_for('main.search') }}" method="get">
-                    <input class="form-control me-2 rounded-pill" type="search" name="q" placeholder="Tìm Laptop, Linh kiện..." aria-label="Search">
-                    <button class="btn btn-outline-light rounded-pill" type="submit">Tìm</button>
-                </form>
-                <div class="navbar-nav ms-auto align-items-center">
-                    <a class="nav-link position-relative me-3" href="{{ url_for('main.cart') }}">
-                        <i class="fa-solid fa-cart-shopping fs-5"></i>
-                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                            {{ session.get('cart', [])|length }}
-                        </span>
+                <div class="search-wrap">
+                    <form action="{{ url_for('main.search') }}" method="get" style="display:contents;">
+                        <input type="search" name="q" placeholder="Tìm Laptop, iPhone, Phụ kiện..."
+                               value="{{ request.args.get('q', '') }}">
+                        <button type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
+                    </form>
+                </div>
+                <div class="nav-actions ms-auto">
+                    <a class="cart-btn" href="{{ url_for('main.cart') }}" title="Giỏ hàng">
+                        <i class="fa-solid fa-cart-shopping" style="font-size:1rem;"></i>
+                        {% set cart_count = session.get('cart', [])|length %}
+                        {% if cart_count > 0 %}
+                        <span class="cart-badge">{{ cart_count }}</span>
+                        {% endif %}
                     </a>
                     {% if current_user.is_authenticated %}
-                        <div class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">{{ current_user.username }}</a>
+                        <div class="user-dropdown dropdown">
+                            <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown">
+                                <div class="user-avatar">{{ current_user.username[0].upper() }}</div>
+                                {{ current_user.username }}
+                            </a>
                             <ul class="dropdown-menu dropdown-menu-end">
-                                <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}">Đăng Xuất</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}">
+                                    <i class="fa-solid fa-right-from-bracket me-2 opacity-50"></i>Đăng xuất
+                                </a></li>
                             </ul>
                         </div>
                     {% else %}
-                        <a class="nav-link" href="{{ url_for('auth.login') }}">Đăng Nhập</a>
-                        <a class="btn btn-primary btn-sm ms-lg-2" href="{{ url_for('auth.register') }}">Đăng Ký</a>
+                        <a class="btn-login" href="{{ url_for('auth.login') }}">Đăng nhập</a>
+                        <a class="btn-register" href="{{ url_for('auth.register') }}">Đăng ký</a>
                     {% endif %}
                 </div>
             </div>
         </div>
     </nav>
 
-    <div class="container mt-4 min-vh-100">
-        {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-            <div class="alert alert-{{ category if category != 'message' else 'info' }} alert-dismissible fade show">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-            {% endfor %}
-        {% endif %}
-        {% endwith %}
+    <div class="container main-content">
+        <div class="flash-container">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                <div class="alert alert-{{ category if category != 'message' else 'info' }} alert-dismissible fade show mt-3">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                {% endfor %}
+            {% endif %}
+            {% endwith %}
+        </div>
         {% block content %}{% endblock %}
     </div>
 
     <footer>
         <div class="container">
-            <div class="row">
+            <div class="row g-4">
                 <div class="col-md-4">
-                    <h5 class="text-white fw-bold">TECH STORE</h5>
-                    <p class="small text-muted">Hệ thống phân phối linh kiện điện tử chính hãng hàng đầu.</p>
+                    <div class="footer-brand"><i class="fa-solid fa-microchip me-2"></i>TECH STORE</div>
+                    <p>Hệ thống phân phối linh kiện & thiết bị điện tử chính hãng hàng đầu Việt Nam.</p>
+                    <div class="d-flex gap-3 mt-3">
+                        <a href="#" style="color:var(--muted); font-size:1.1rem;"><i class="fa-brands fa-facebook"></i></a>
+                        <a href="#" style="color:var(--muted); font-size:1.1rem;"><i class="fa-brands fa-instagram"></i></a>
+                        <a href="#" style="color:var(--muted); font-size:1.1rem;"><i class="fa-brands fa-tiktok"></i></a>
+                    </div>
                 </div>
                 <div class="col-md-4">
-                    <h6 class="text-white">Hỗ trợ khách hàng</h6>
-                    <ul class="list-unstyled small">
+                    <h6>Hỗ trợ khách hàng</h6>
+                    <ul>
                         <li><a href="#">Chính sách bảo hành</a></li>
                         <li><a href="#">Giao hàng tận nơi</a></li>
+                        <li><a href="#">Đổi trả & hoàn tiền</a></li>
+                        <li><a href="#">Hướng dẫn mua hàng</a></li>
                     </ul>
                 </div>
-                <div class="col-md-4 text-md-end">
-                    <h6 class="text-white">Liên hệ</h6>
-                    <p class="small"><i class="fa-solid fa-phone me-2"></i>1900 1234<br>
-                    <i class="fa-solid fa-envelope me-2"></i>contact@techstore.vn</p>
+                <div class="col-md-4">
+                    <h6>Liên hệ</h6>
+                    <p><i class="fa-solid fa-phone me-2" style="color:var(--accent)"></i>1900 1234</p>
+                    <p class="mt-2"><i class="fa-solid fa-envelope me-2" style="color:var(--accent)"></i>contact@techstore.vn</p>
+                    <p class="mt-2"><i class="fa-solid fa-location-dot me-2" style="color:var(--accent)"></i>TP. Hồ Chí Minh, Việt Nam</p>
                 </div>
             </div>
-            <hr class="border-secondary">
-            <p class="text-center small mb-0">&copy; 2026 TechStore. All rights reserved.</p>
+            <hr>
+            <p class="footer-bottom">&copy; 2026 TechStore. All rights reserved.</p>
         </div>
     </footer>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

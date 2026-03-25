@@ -1,28 +1,251 @@
 {% extends "base.html" %}
-
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-4">
-        <h1 class="text-center">Đăng Nhập</h1>
+
+<style>
+    .auth-wrapper {
+        min-height: calc(100vh - 200px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 48px 0;
+    }
+
+    .auth-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: 24px;
+        padding: 40px;
+        width: 100%;
+        max-width: 420px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .auth-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 3px;
+        background: var(--gradient);
+    }
+
+    .auth-card::after {
+        content: '';
+        position: absolute;
+        top: -100px; right: -100px;
+        width: 200px; height: 200px;
+        background: radial-gradient(circle, rgba(255,77,28,0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .auth-logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 28px;
+    }
+
+    .auth-logo-icon {
+        width: 40px; height: 40px;
+        background: var(--gradient);
+        border-radius: 10px;
+        display: flex; align-items: center; justify-content: center;
+        color: white;
+        font-size: 1.1rem;
+    }
+
+    .auth-logo-text {
+        font-family: 'Syne', sans-serif;
+        font-weight: 800;
+        font-size: 1.1rem;
+        color: var(--white);
+        letter-spacing: -0.5px;
+    }
+
+    .auth-heading {
+        font-family: 'Syne', sans-serif;
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: var(--white);
+        letter-spacing: -0.5px;
+        margin-bottom: 6px;
+    }
+
+    .auth-sub {
+        font-size: 0.875rem;
+        color: var(--muted);
+        margin-bottom: 32px;
+    }
+
+    /* Form controls */
+    .form-group {
+        margin-bottom: 18px;
+    }
+
+    .form-label {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: block;
+        margin-bottom: 8px;
+        font-family: 'Syne', sans-serif;
+    }
+
+    .form-control {
+        background: var(--dark3) !important;
+        border: 1px solid var(--border) !important;
+        border-radius: 12px !important;
+        color: var(--text) !important;
+        padding: 12px 16px !important;
+        font-size: 0.9rem;
+        font-family: 'DM Sans', sans-serif;
+        transition: border-color 0.2s, box-shadow 0.2s !important;
+        width: 100%;
+    }
+
+    .form-control:focus {
+        outline: none !important;
+        border-color: var(--accent) !important;
+        box-shadow: 0 0 0 3px rgba(255,77,28,0.12) !important;
+        background: var(--dark2) !important;
+    }
+
+    .form-control::placeholder { color: var(--muted) !important; }
+
+    .field-error {
+        color: #ef4444;
+        font-size: 0.78rem;
+        margin-top: 6px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    /* Remember me */
+    .remember-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 24px;
+    }
+
+    .form-check-input {
+        width: 18px; height: 18px;
+        background: var(--dark3) !important;
+        border: 1px solid var(--border) !important;
+        border-radius: 5px !important;
+        cursor: pointer;
+        flex-shrink: 0;
+    }
+
+    .form-check-input:checked {
+        background: var(--accent) !important;
+        border-color: var(--accent) !important;
+    }
+
+    .form-check-label {
+        font-size: 0.875rem;
+        color: var(--muted);
+        cursor: pointer;
+    }
+
+    /* Submit button */
+    .btn-submit {
+        width: 100%;
+        background: var(--gradient);
+        border: none;
+        border-radius: 14px;
+        color: white;
+        padding: 14px;
+        font-size: 0.95rem;
+        font-weight: 700;
+        font-family: 'Syne', sans-serif;
+        cursor: pointer;
+        transition: opacity 0.2s, transform 0.2s;
+        letter-spacing: 0.3px;
+    }
+
+    .btn-submit:hover { opacity: 0.85; transform: translateY(-2px); }
+
+    .auth-footer {
+        text-align: center;
+        margin-top: 20px;
+        font-size: 0.875rem;
+        color: var(--muted);
+    }
+
+    .auth-footer a {
+        color: var(--accent);
+        text-decoration: none;
+        font-weight: 600;
+        transition: opacity 0.2s;
+    }
+
+    .auth-footer a:hover { opacity: 0.8; }
+
+    .divider {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 20px 0;
+        color: var(--muted);
+        font-size: 0.8rem;
+    }
+
+    .divider::before, .divider::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: var(--border);
+    }
+</style>
+
+<div class="auth-wrapper">
+    <div class="auth-card">
+        <div class="auth-logo">
+            <div class="auth-logo-icon">
+                <i class="fa-solid fa-microchip"></i>
+            </div>
+            <span class="auth-logo-text">TECH STORE</span>
+        </div>
+
+        <h2 class="auth-heading">Chào mừng trở lại!</h2>
+        <p class="auth-sub">Đăng nhập để tiếp tục mua sắm và xem đơn hàng.</p>
+
         <form action="" method="post" novalidate>
             {{ form.hidden_tag() }}
-            <div class="mb-3">
+
+            <div class="form-group">
                 {{ form.username.label(class="form-label") }}
-                {{ form.username(class="form-control") }}
-                {% for error in form.username.errors %}<span class="text-danger">[{{ error }}]</span>{% endfor %}
+                {{ form.username(class="form-control", placeholder="Nhập tên đăng nhập...") }}
+                {% for error in form.username.errors %}
+                <div class="field-error"><i class="fa-solid fa-circle-exclamation"></i>{{ error }}</div>
+                {% endfor %}
             </div>
-            <div class="mb-3">
+
+            <div class="form-group">
                 {{ form.password.label(class="form-label") }}
-                {{ form.password(class="form-control") }}
-                {% for error in form.password.errors %}<span class="text-danger">[{{ error }}]</span>{% endfor %}
+                {{ form.password(class="form-control", placeholder="Nhập mật khẩu...") }}
+                {% for error in form.password.errors %}
+                <div class="field-error"><i class="fa-solid fa-circle-exclamation"></i>{{ error }}</div>
+                {% endfor %}
             </div>
-            <div class="mb-3 form-check">
+
+            <div class="remember-row">
                 {{ form.remember_me(class="form-check-input") }}
                 {{ form.remember_me.label(class="form-check-label") }}
             </div>
-            <p>{{ form.submit(class="btn btn-primary w-100") }}</p>
+
+            <button type="submit" class="btn-submit">
+                <i class="fa-solid fa-right-to-bracket me-2"></i>Đăng nhập
+            </button>
         </form>
-        <p>Chưa có tài khoản? <a href="{{ url_for('auth.register') }}">Đăng ký ngay!</a></p>
+
+        <div class="auth-footer">
+            Chưa có tài khoản? <a href="{{ url_for('auth.register') }}">Đăng ký ngay →</a>
+        </div>
     </div>
 </div>
 {% endblock %}

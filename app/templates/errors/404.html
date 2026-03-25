@@ -1,6 +1,42 @@
 {% extends 'base.html' %}
 {% block content %}
-<h1>404 - Không tìm thấy trang</h1>
-<p>Trang bạn yêu cầu không tồn tại.</p>
-<a href="{{ url_for('main.index') }}" class="btn btn-primary">Về trang chủ</a>
+<style>
+    .error-wrap {
+        min-height: calc(100vh - 200px);
+        display: flex; align-items: center; justify-content: center;
+        text-align: center; padding: 60px 20px;
+    }
+    .error-code {
+        font-family: 'Syne', sans-serif;
+        font-size: clamp(6rem, 15vw, 10rem);
+        font-weight: 800;
+        line-height: 1;
+        background: var(--gradient);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 8px;
+        display: block;
+    }
+    .error-title { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 700; color: var(--white); margin-bottom: 10px; }
+    .error-msg { color: var(--muted); font-size: 0.95rem; margin-bottom: 32px; }
+    .btn-home {
+        display: inline-flex; align-items: center; gap: 8px;
+        background: var(--gradient); color: white; border-radius: 50px;
+        padding: 12px 28px; font-size: 0.9rem; font-weight: 600;
+        font-family: 'Syne', sans-serif; text-decoration: none;
+        transition: opacity 0.2s, transform 0.2s;
+    }
+    .btn-home:hover { opacity: 0.85; transform: translateY(-2px); color: white; }
+</style>
+<div class="error-wrap">
+    <div>
+        <span class="error-code">404</span>
+        <h2 class="error-title">Trang không tồn tại</h2>
+        <p class="error-msg">Trang bạn tìm kiếm đã bị xóa hoặc chưa từng tồn tại.</p>
+        <a href="{{ url_for('main.index') }}" class="btn-home">
+            <i class="fa-solid fa-house"></i> Về trang chủ
+        </a>
+    </div>
+</div>
 {% endblock %}

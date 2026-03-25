@@ -14,7 +14,7 @@ with app.app_context():
             name='iPhone 15 Pro Max',
             price=29990000,
             description='Điện thoại flagship Apple với màn hình OLED 6.7 inch, chip A17 Pro, camera 48MP',
-            image_url='https://via.placeholder.com/300x400?text=iPhone+15+Pro+Max',
+            image_url='/app/static/images/product/iphone15.png',
             stock=15
         ),
         Product(
