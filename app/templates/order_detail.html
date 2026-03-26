@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<style>
+    .head { padding: 30px 0 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
+    .title { font-family: 'Syne', sans-serif; color: var(--white); font-size: 1.8rem; margin: 0; }
+
+    .panel {
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        overflow: hidden;
+    }
+
+    .table { margin: 0; color: var(--text); }
+    .table th, .table td { border-color: var(--border); }
+    .table th { color: var(--muted); font-size: .8rem; text-transform: uppercase; }
+
+    .sum {
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 16px;
+    }
+
+    .sum-row { display: flex; justify-content: space-between; padding: 8px 0; color: var(--muted); }
+    .sum-row.total { border-top: 1px solid var(--border); margin-top: 6px; padding-top: 12px; color: var(--white); font-weight: 700; }
+</style>
+
+<div class="head">
+    <h1 class="title">Don #{{ '%06d'|format(order.id) }}</h1>
+    <a href="{{ url_for('main.order_history') }}" class="btn btn-outline-light btn-sm">Quay lai lich su don</a>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-8">
+        <div class="panel">
+            <table class="table table-dark table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>San pham</th>
+                        <th>So luong</th>
+                        <th>Don gia</th>
+                        <th>Thanh tien</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in order.items %}
+                    <tr>
+                        <td>
+                            {{ item.product.name if item.product else 'San pham da xoa' }}
+                            {% if item.variant_label %}
+                            <div class="text-muted small">Model: {{ item.variant_label }}</div>
+                            {% endif %}
+                        </td>
+                        <td>{{ item.quantity }}</td>
+                        <td>{{ '{:,.0f}'.format(item.unit_price) }} d</td>
+                        <td>{{ '{:,.0f}'.format(item.unit_price * item.quantity) }} d</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="sum">
+            <div class="sum-row"><span>Ngay dat</span><span>{{ order.created_at.strftime('%d/%m/%Y %H:%M') }}</span></div>
+            <div class="sum-row"><span>Trang thai</span><span>{{ order.status }}</span></div>
+            <div class="sum-row total"><span>Tong thanh toan</span><span>{{ '{:,.0f}'.format(order.total_amount) }} d</span></div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% block content %}
+<style>
+  .head { padding: 28px 0 12px; display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; }
+  .title { font-family:'Syne',sans-serif; color:var(--white); margin:0; }
+  .chip-wrap { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px; }
+  .chip { border:1px solid var(--border); padding:7px 12px; border-radius:999px; color:var(--muted); text-decoration:none; cursor:pointer; }
+  .chip.active { background:var(--gradient); color:#fff; border-color:transparent; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:12px; }
+  .card { background:var(--card-bg); border:1px solid var(--border); border-radius:14px; overflow:hidden; }
+  .card img { width:100%; height:140px; object-fit:contain; background:var(--dark3); }
+  .card-body { padding:12px; }
+  .name { color:var(--white); font-family:'Syne',sans-serif; font-size:.95rem; }
+  .price { color:var(--accent); font-weight:700; margin-top:6px; }
+  .muted { color:var(--muted); font-size:.82rem; }
+</style>
+
+<div class="head">
+  <h1 class="title">Danh Muc San Pham</h1>
+  <a class="btn btn-outline-light btn-sm" href="{{ url_for('main.index') }}">Ve trang chu</a>
+</div>
+
+<div class="chip-wrap">
+  {% for c in categories %}
+  <a class="chip js-cat" data-slug="{{ c.slug }}" href="{{ url_for('main.category_detail', slug=c.slug) }}">{{ c.name }}</a>
+  {% endfor %}
+</div>
+
+<div id="catResult" class="grid">
+  {% for p in featured %}
+  <div class="card" data-cat="{{ p.category.slug if p.category else '' }}">
+    <img src="{{ p.image_url }}" alt="{{ p.name }}">
+    <div class="card-body">
+      <a class="name text-decoration-none" href="{{ url_for('main.product_detail', id=p.id) }}">{{ p.name }}</a>
+      <div class="muted">{{ p.category.name if p.category else '-' }}</div>
+      <div class="price">{{ '{:,.0f}'.format(p.price) }} d</div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<script>
+  const container = document.getElementById('catResult');
+  document.querySelectorAll('.js-cat').forEach((btn) => {
+    btn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      document.querySelectorAll('.js-cat').forEach((x) => x.classList.remove('active'));
+      btn.classList.add('active');
+
+      try {
+        const res = await fetch(`/api/categories/${btn.dataset.slug}/products`);
+        const data = await res.json();
+        container.innerHTML = (data.products || []).map((p) => `
+          <div class="card" data-cat="${p.category_slug || ''}">
+            <img src="${p.image_url}" alt="${p.name}">
+            <div class="card-body">
+              <a class="name text-decoration-none" href="/product/${p.id}">${p.name}</a>
+              <div class="muted">${data.category?.name || ''}</div>
+              <div class="price">${Number(p.price).toLocaleString('en-US')} d</div>
+            </div>
+          </div>
+        `).join('');
+      } catch (err) {
+        console.error(err);
+      }
+    });
+  });
+</script>
+{% endblock %}

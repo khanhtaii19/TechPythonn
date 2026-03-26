@@ -6,3 +6,4 @@ flask-mail
 flask-wtf
 email-validator
 python-dotenv
+pymysql

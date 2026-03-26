@@ -1,79 +1,135 @@
-"""Script để seed dữ liệu mẫu vào database"""
+"""Seed categories, products, variants, and news data."""
+
 from app import create_app, db
-from app.models import Product
+from app.models import Category, NewsArticle, Product, ProductVariant
 
 app = create_app()
 
+CATEGORY_NAMES = [
+    'Dien Thoai',
+    'Laptop',
+    'May Tinh Bang',
+    'Dong Ho Thong Minh',
+    'Phu Kien',
+]
+
+PRODUCT_PREFIXES = {
+    'Dien Thoai': ['Nova', 'Prime', 'Ultra', 'Flex', 'Aero'],
+    'Laptop': ['WorkPro', 'ZenBook', 'GamingX', 'SlimAir', 'Creator'],
+    'May Tinh Bang': ['TabGo', 'TabPlus', 'Slate', 'PadOne', 'PadMax'],
+    'Dong Ho Thong Minh': ['WatchFit', 'TimeX', 'Pulse', 'Active', 'UltraWatch'],
+    'Phu Kien': ['Pods', 'Charge', 'Link', 'Stand', 'Grip'],
+}
+
+NEWS_DATA = [
+    {
+        'title': 'Xu huong cong nghe 2026: AI ca nhan hoa manh me',
+        'slug': 'xu-huong-cong-nghe-2026-ai-ca-nhan-hoa',
+        'summary': 'AI duoc tich hop sau hon vao thiet bi ca nhan va trai nghiem mua sam.',
+        'content': 'Trong nam 2026, AI tap trung vao tro ly ca nhan, toi uu pin va camera, va nang cao bao mat cho nguoi dung.',
+    },
+    {
+        'title': 'Huong dan chon laptop cho lap trinh vien',
+        'slug': 'huong-dan-chon-laptop-cho-lap-trinh-vien',
+        'summary': 'Nhung tieu chi quan trong khi chon laptop cho code va devops.',
+        'content': 'Uu tien CPU nhieu nhan, RAM toi thieu 16GB, SSD NVMe, man hinh tot va ban phim on dinh de lam viec lau dai.',
+    },
+    {
+        'title': '5 meo keo dai tuoi tho pin dien thoai',
+        'slug': '5-meo-keo-dai-tuoi-tho-pin-dien-thoai',
+        'summary': 'Toi uu thoi quen sac pin va cai dat de su dung ben bi hon.',
+        'content': 'Khong de pin 0% thuong xuyen, han che nhiet do cao, su dung sac chinh hang va theo doi ung dung ton pin.',
+    },
+    {
+        'title': 'So sanh tablet cho hoc tap va ghi chu',
+        'slug': 'so-sanh-tablet-cho-hoc-tap-va-ghi-chu',
+        'summary': 'Nhung diem can can nhac giua cac dong tablet pho bien.',
+        'content': 'Neu hoc tap, hay uu tien but, do tre thap, pin dai va he sinh thai dong bo tai lieu.',
+    },
+]
+
+
+def slugify(text):
+    return text.lower().replace(' ', '-').replace('/', '-')
+
+
 with app.app_context():
-    # Xóa dữ liệu cũ (tùy chọn)
-    # Product.query.delete()
-    
-    # Tạo các sản phẩm mẫu
-    products = [
-        Product(
-            name='iPhone 15 Pro Max',
-            price=29990000,
-            description='Điện thoại flagship Apple với màn hình OLED 6.7 inch, chip A17 Pro, camera 48MP',
-            image_url='/app/static/images/product/iphone15.png',
-            stock=15
-        ),
-        Product(
-            name='MacBook Pro M3',
-            price=49990000,
-            description='Laptop chuyên nghiệp Apple với chip M3, 8GB RAM, SSD 512GB',
-            image_url='https://via.placeholder.com/300x400?text=MacBook+Pro+M3',
-            stock=8
-        ),
-        Product(
-            name='Samsung Galaxy S24',
-            price=18990000,
-            description='Flagship Samsung với màn hình Dynamic AMOLED 120Hz, chip Snapdragon 8 Gen 3',
-            image_url='https://via.placeholder.com/300x400?text=Galaxy+S24',
-            stock=20
-        ),
-        Product(
-            name='iPad Air M2',
-            price=16990000,
-            description='Tablet mạnh mẽ với chip M2, màn hình Liquid Retina 11 inch, hỗ trợ Apple Pencil',
-            image_url='https://via.placeholder.com/300x400?text=iPad+Air+M2',
-            stock=12
-        ),
-        Product(
-            name='Sony WH-1000XM5 Headphones',
-            price=7990000,
-            description='Tai nghe không dây cao cấp với ANC tốt nhất, thời lượng pin 40 giờ',
-            image_url='https://via.placeholder.com/300x400?text=Sony+Headphones',
-            stock=25
-        ),
-        Product(
-            name='Dell XPS 15',
-            price=42990000,
-            description='Laptop cao cấp Windows với Intel Core i9, RTX 4090, màn hình OLED 4K',
-            image_url='https://via.placeholder.com/300x400?text=Dell+XPS+15',
-            stock=6
-        ),
-        Product(
-            name='Google Pixel 8 Pro',
-            price=21990000,
-            description='Smartphone Google với AI photography, chip Tensor G3, camera 50MP',
-            image_url='https://via.placeholder.com/300x400?text=Pixel+8+Pro',
-            stock=18
-        ),
-        Product(
-            name='Apple Watch Ultra',
-            price=12990000,
-            description='Smartwatch bền bỉ với thiết kế titanium, pin 36 giờ, chống nước 100m',
-            image_url='https://via.placeholder.com/300x400?text=Apple+Watch+Ultra',
-            stock=14
-        ),
-    ]
-    
-    # Thêm vào database
-    for product in products:
-        # Kiểm tra xem sản phẩm đã tồn tại chưa
-        existing = Product.query.filter_by(name=product.name).first()
-        if not existing:
-            db.session.add(product)
-    
+    categories = {}
+    for name in CATEGORY_NAMES:
+        slug = slugify(name)
+        cat = Category.query.filter_by(slug=slug).first()
+        if not cat:
+            cat = Category(name=name, slug=slug)
+            db.session.add(cat)
+            db.session.flush()
+        categories[name] = cat
+
+    created_products = 0
+    created_variants = 0
+
+    for cat_name in CATEGORY_NAMES:
+        cat = categories[cat_name]
+        prefixes = PRODUCT_PREFIXES[cat_name]
+
+        for idx in range(1, 21):
+            product_name = f"{prefixes[idx % len(prefixes)]} {cat_name} {idx:02d}"
+            product = Product.query.filter_by(name=product_name).first()
+            if not product:
+                base_price = 1500000 + idx * 250000 + (CATEGORY_NAMES.index(cat_name) * 450000)
+                product = Product(
+                    name=product_name,
+                    category_id=cat.id,
+                    price=base_price,
+                    description=f"{product_name} la san pham chat luong cao trong danh muc {cat_name}.",
+                    image_url=f"https://via.placeholder.com/600x400?text={product_name.replace(' ', '+')}",
+                    stock=30,
+                )
+                db.session.add(product)
+                db.session.flush()
+                created_products += 1
+            else:
+                product.category_id = cat.id
+
+            variants_data = [
+                ('Ban Tieu Chuan', 0, 12),
+                ('Mau Den', 150000, 10),
+                ('Mau Bac / Quoc Te', 300000, 8),
+            ]
+
+            for v_idx, (label, delta, v_stock) in enumerate(variants_data, start=1):
+                sku = f"{cat.slug[:4].upper()}-{product.id:04d}-V{v_idx}"
+                variant = ProductVariant.query.filter_by(sku=sku).first()
+                if not variant:
+                    variant = ProductVariant(
+                        product_id=product.id,
+                        label=label,
+                        price_delta=delta,
+                        stock=v_stock,
+                        sku=sku,
+                    )
+                    db.session.add(variant)
+                    created_variants += 1
+
+            total_stock = sum(v[2] for v in variants_data)
+            product.stock = total_stock
+
+    created_news = 0
+    for item in NEWS_DATA:
+        post = NewsArticle.query.filter_by(slug=item['slug']).first()
+        if not post:
+            post = NewsArticle(
+                title=item['title'],
+                slug=item['slug'],
+                summary=item['summary'],
+                content=item['content'],
+                image_url='https://images.unsplash.com/photo-1518770660439-4636190af475?w=1200',
+            )
+            db.session.add(post)
+            created_news += 1
+
     db.session.commit()
-    print(f"✅ Đã thêm {len(products)} sản phẩm mẫu vào database")
+
+    total_products = Product.query.count()
+    total_categories = Category.query.count()
+    print(f"Seed done: +{created_products} products, +{created_variants} variants, +{created_news} news")
+    print(f"Current totals: {total_categories} categories, {total_products} products")

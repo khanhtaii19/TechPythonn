@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<style>
+    .product-wrap { padding-top: 34px; }
+    .card-detail { background: var(--card-bg); border: 1px solid var(--border); border-radius: 20px; overflow: hidden; }
+    .media { background: var(--dark3); min-height: 380px; display: flex; align-items: center; justify-content: center; padding: 24px; }
+    .media img { width: 100%; max-height: 320px; object-fit: contain; }
+
+    .body { padding: 26px; }
+    .name { font-family: 'Syne', sans-serif; color: var(--white); font-weight: 800; font-size: 1.7rem; }
+    .desc { color: var(--muted); line-height: 1.7; margin: 14px 0 16px; }
+    .price { font-family: 'Syne', sans-serif; color: var(--accent); font-size: 1.8rem; font-weight: 800; }
+
+    .variant-select {
+        width: 100%;
+        background: var(--dark3);
+        color: var(--text);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 10px 12px;
+        margin-top: 12px;
+    }
+
+    .buy-split { margin-top: 16px; display: grid; grid-template-columns: 9fr 1fr; gap: 10px; }
+    .btn-buy, .btn-add { width: 100%; border: 0; border-radius: 12px; padding: 12px 14px; color: #fff; font-family: 'Syne', sans-serif; font-weight: 700; }
+    .btn-buy { background: var(--gradient); }
+    .btn-add { background: rgba(255, 77, 28, .22); border: 1px solid rgba(255,77,28,.55); }
+
+    .btn-ghost { display: inline-flex; margin-top: 12px; border: 1px solid var(--border); border-radius: 12px; padding: 10px 16px; color: var(--text); text-decoration: none; }
+
+    .section-title { font-family: 'Syne', sans-serif; color: var(--white); font-size: 1.1rem; margin: 28px 0 14px; }
+    .related-item { background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; padding: 12px; height: 100%; }
+    .related-item img { width: 100%; height: 140px; object-fit: contain; background: var(--dark3); border-radius: 10px; }
+    .related-name { margin-top: 10px; color: var(--white); font-family: 'Syne', sans-serif; font-size: .92rem; }
+
+    @media (max-width: 576px) { .buy-split { grid-template-columns: 1fr; } }
+</style>
+
+<div class="product-wrap">
+    <div class="row g-4 card-detail">
+        <div class="col-lg-5">
+            <div class="media">
+                <img src="{{ product.image_url or '' }}" alt="{{ product.name }}">
+            </div>
+        </div>
+        <div class="col-lg-7">
+            <div class="body">
+                <h1 class="name">{{ product.name }}</h1>
+                <div class="price">{{ "{:,.0f}".format(product.price) }} d</div>
+                <p class="desc">{{ product.description }}</p>
+
+                {% if product.variants %}
+                <select id="variantSelect" class="variant-select" name="variant_id">
+                    {% for v in product.variants %}
+                    <option value="{{ v.id }}" data-stock="{{ v.stock }}" data-price="{{ (product.price + v.price_delta)|round(0) }}">
+                        {{ v.label }} - {{ '{:,.0f}'.format(product.price + v.price_delta) }} d (Con {{ v.stock }})
+                    </option>
+                    {% endfor %}
+                </select>
+                {% endif %}
+
+                {% set stock_num = product.stock or 0 %}
+                {% if stock_num > 0 or product.variants %}
+                <div class="buy-split">
+                    <form class="buy-form" action="{{ url_for('main.buy_now', id=product.id) }}" method="post">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="variant_id" value="{% if product.variants %}{{ product.variants[0].id }}{% endif %}">
+                        <button type="submit" class="btn-buy"><i class="fa-solid fa-bolt"></i> Mua ngay</button>
+                    </form>
+                    <form class="js-add-to-cart addcart-form" action="{{ url_for('main.add_to_cart', id=product.id) }}" method="post">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="variant_id" value="{% if product.variants %}{{ product.variants[0].id }}{% endif %}">
+                        <button type="submit" class="btn-add" title="Them vao gio"><i class="fa-solid fa-cart-plus"></i></button>
+                    </form>
+                </div>
+                {% else %}
+                <button class="btn-buy" disabled style="opacity:.5; margin-top:12px;">Het hang</button>
+                {% endif %}
+
+                <a class="btn-ghost" href="{{ url_for('main.index') }}">Quay lai danh sach</a>
+            </div>
+        </div>
+    </div>
+
+    {% if related_products %}
+    <div class="section-title">San pham lien quan</div>
+    <div class="row g-3">
+        {% for p in related_products %}
+        <div class="col-6 col-md-4 col-lg-3">
+            <a href="{{ url_for('main.product_detail', id=p.id) }}" class="text-decoration-none">
+                <div class="related-item">
+                    <img src="{{ p.image_url or '' }}" alt="{{ p.name }}">
+                    <div class="related-name">{{ p.name }}</div>
+                    <div class="price" style="font-size:1rem;">{{ "{:,.0f}".format(p.price) }} d</div>
+                </div>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    (() => {
+        const select = document.getElementById('variantSelect');
+        if (!select) return;
+
+        const syncVariantInput = () => {
+            const value = select.value;
+            document.querySelectorAll('input[name="variant_id"]').forEach((el) => {
+                el.value = value;
+            });
+        };
+
+        select.addEventListener('change', syncVariantInput);
+        syncVariantInput();
+    })();
+</script>
+
+{% endblock %}

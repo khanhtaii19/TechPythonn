@@ -1,7 +1,15 @@
-Chào {{ user.username }},
+Chao {{ user.username }},
 
-Đơn hàng của bạn đã được tiếp nhận thành công.
-Cảm ơn bạn đã ủng hộ TECH STORE.
+Don hang #{{ '%06d'|format(order.id) }} cua ban da duoc tiep nhan thanh cong.
 
-Trân trọng,
+Chi tiet don hang:
+{% for item in order.items %}
+- {{ item.product.name }}{% if item.variant_label %} ({{ item.variant_label }}){% endif %} x{{ item.quantity }}: {{ '{:,.0f}'.format(item.unit_price * item.quantity) }} d
+{% endfor %}
+
+Tong thanh toan: {{ '{:,.0f}'.format(order.total_amount) }} d
+
+Cam on ban da ung ho TECH STORE.
+
+Tran trong,
 Tech Store

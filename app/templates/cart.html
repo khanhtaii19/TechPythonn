@@ -2,411 +2,116 @@
 {% block content %}
 
 <style>
-    .page-header {
-        padding: 36px 0 28px;
-    }
+    .page-header { padding: 36px 0 24px; }
+    .page-title { font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800; color: var(--white); }
 
-    .page-tag {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        background: rgba(255,77,28,0.1);
-        border: 1px solid rgba(255,77,28,0.25);
-        color: var(--accent);
-        border-radius: 50px;
-        padding: 4px 14px;
-        font-size: 0.75rem;
-        font-weight: 700;
-        letter-spacing: 1px;
-        text-transform: uppercase;
-        margin-bottom: 12px;
-        font-family: 'Syne', sans-serif;
-    }
+    .cart-box, .summary-box { background: var(--card-bg); border: 1px solid var(--border); border-radius: 20px; }
+    .cart-box { overflow: hidden; }
 
-    .page-title {
-        font-family: 'Syne', sans-serif;
-        font-size: 2rem;
-        font-weight: 800;
-        color: var(--white);
-        letter-spacing: -1px;
-    }
+    .cart-head { display: flex; justify-content: space-between; align-items: center; padding: 18px 22px; border-bottom: 1px solid var(--border); }
+    .cart-head h5 { margin: 0; font-family: 'Syne', sans-serif; color: var(--white); }
 
-    /* ===== CART TABLE ===== */
-    .cart-box {
-        background: var(--card-bg);
-        border: 1px solid var(--border);
-        border-radius: 20px;
-        overflow: hidden;
-    }
+    .cart-table { width: 100%; border-collapse: collapse; }
+    .cart-table th, .cart-table td { padding: 14px 18px; border-bottom: 1px solid var(--border); }
+    .cart-table th { color: var(--muted); font-size: .78rem; text-transform: uppercase; letter-spacing: .5px; }
 
-    .cart-box-header {
-        padding: 20px 24px;
-        border-bottom: 1px solid var(--border);
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-    }
+    .product-cell { display: flex; align-items: center; gap: 12px; }
+    .thumb { width: 56px; height: 56px; border-radius: 10px; border: 1px solid var(--border); background: var(--dark3); overflow: hidden; display: flex; align-items: center; justify-content: center; }
+    .thumb img { width: 100%; height: 100%; object-fit: contain; padding: 6px; }
+    .name { font-family: 'Syne', sans-serif; color: var(--white); font-size: .92rem; }
+    .qty, .variant { color: var(--muted); font-size: .82rem; }
 
-    .cart-box-header h5 {
-        font-family: 'Syne', sans-serif;
-        color: var(--white);
-        font-weight: 700;
-        margin: 0;
-        font-size: 1rem;
-    }
+    .price { font-family: 'Syne', sans-serif; color: var(--accent); font-weight: 700; }
+    .remove-form { margin: 0; }
+    .btn-remove { border: 1px solid rgba(239, 68, 68, 0.35); color: #ef4444; background: rgba(239, 68, 68, 0.06); border-radius: 10px; padding: 8px 10px; }
 
-    .cart-count-badge {
-        background: rgba(255,77,28,0.12);
-        color: var(--accent);
-        border: 1px solid rgba(255,77,28,0.25);
-        border-radius: 50px;
-        padding: 2px 12px;
-        font-size: 0.8rem;
-        font-weight: 700;
-        font-family: 'Syne', sans-serif;
-    }
+    .summary-box { padding: 20px; position: sticky; top: 90px; }
+    .sum-title { font-family: 'Syne', sans-serif; color: var(--white); margin-bottom: 14px; }
+    .sum-row { display: flex; justify-content: space-between; color: var(--muted); padding: 6px 0; }
+    .sum-row.total { border-top: 1px solid var(--border); margin-top: 10px; padding-top: 12px; color: var(--white); font-weight: 700; }
 
-    .cart-table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-
-    .cart-table thead th {
-        padding: 14px 24px;
-        font-size: 0.75rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        color: var(--muted);
-        font-family: 'Syne', sans-serif;
-        border-bottom: 1px solid var(--border);
-    }
-
-    .cart-table tbody tr {
-        border-bottom: 1px solid var(--border);
-        transition: background 0.15s;
-    }
-
-    .cart-table tbody tr:last-child { border-bottom: none; }
-    .cart-table tbody tr:hover { background: rgba(255,255,255,0.02); }
-
-    .cart-table td {
-        padding: 18px 24px;
-        vertical-align: middle;
-        font-size: 0.9rem;
-    }
-
-    .product-cell {
-        display: flex;
-        align-items: center;
-        gap: 16px;
-    }
-
-    .product-thumb {
-        width: 60px; height: 60px;
-        background: var(--dark3);
-        border: 1px solid var(--border);
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.5rem;
-        flex-shrink: 0;
-        overflow: hidden;
-    }
-
-    .product-thumb img {
-        width: 100%;
-        height: 100%;
-        object-fit: contain;
-        padding: 6px;
-    }
-
-    .product-cell-name {
-        font-family: 'Syne', sans-serif;
-        font-weight: 700;
-        color: var(--white);
-        font-size: 0.9rem;
-        margin-bottom: 3px;
-    }
-
-    .product-cell-sub {
-        font-size: 0.78rem;
-        color: var(--muted);
-    }
-
-    .price-cell {
-        font-family: 'Syne', sans-serif;
-        font-size: 1rem;
-        font-weight: 700;
-        color: var(--accent);
-    }
-
-    .delete-btn {
-        width: 34px; height: 34px;
-        background: rgba(239,68,68,0.08);
-        border: 1px solid rgba(239,68,68,0.2);
-        border-radius: 8px;
-        display: flex; align-items: center; justify-content: center;
-        color: #ef4444;
-        text-decoration: none;
-        transition: all 0.2s;
-    }
-
-    .delete-btn:hover {
-        background: rgba(239,68,68,0.15);
-        color: #ef4444;
-    }
-
-    /* ===== ORDER SUMMARY ===== */
-    .summary-box {
-        background: var(--card-bg);
-        border: 1px solid var(--border);
-        border-radius: 20px;
-        padding: 24px;
-        position: sticky;
-        top: 90px;
-    }
-
-    .summary-title {
-        font-family: 'Syne', sans-serif;
-        font-size: 1rem;
-        font-weight: 700;
-        color: var(--white);
-        margin-bottom: 20px;
-        padding-bottom: 16px;
-        border-bottom: 1px solid var(--border);
-    }
-
-    .summary-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 8px 0;
-        font-size: 0.875rem;
-        color: var(--muted);
-    }
-
-    .summary-row.total {
-        padding-top: 14px;
-        margin-top: 8px;
-        border-top: 1px solid var(--border);
-        font-size: 1rem;
-        color: var(--white);
-        font-weight: 700;
-        font-family: 'Syne', sans-serif;
-    }
-
-    .summary-row.total .amount {
-        font-size: 1.3rem;
-        color: var(--accent);
-    }
-
-    .free-ship {
-        color: #22c55e;
-        font-size: 0.8rem;
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        gap: 4px;
-    }
-
-    .btn-checkout {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 10px;
-        background: var(--gradient);
-        color: white;
-        border: none;
-        border-radius: 14px;
-        padding: 15px;
-        width: 100%;
-        font-size: 0.95rem;
-        font-weight: 700;
-        font-family: 'Syne', sans-serif;
-        cursor: pointer;
-        transition: opacity 0.2s, transform 0.2s;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        margin-top: 20px;
-    }
-
-    .btn-checkout:hover { opacity: 0.85; transform: translateY(-2px); }
-
-    .secure-badges {
-        display: flex;
-        gap: 10px;
-        justify-content: center;
-        margin-top: 14px;
-        flex-wrap: wrap;
-    }
-
-    .secure-badge {
-        font-size: 0.72rem;
-        color: var(--muted);
-        display: flex;
-        align-items: center;
-        gap: 4px;
-    }
-
-    /* ===== EMPTY CART ===== */
-    .empty-cart {
-        text-align: center;
-        padding: 80px 40px;
-    }
-
-    .empty-cart-icon {
-        width: 90px; height: 90px;
-        background: var(--dark3);
-        border: 1px solid var(--border);
-        border-radius: 50%;
-        display: flex; align-items: center; justify-content: center;
-        font-size: 2.2rem;
-        margin: 0 auto 20px;
-        color: var(--muted);
-    }
-
-    .empty-cart h4 {
-        color: var(--white);
-        font-family: 'Syne', sans-serif;
-        margin-bottom: 8px;
-    }
-
-    .empty-cart p { color: var(--muted); font-size: 0.9rem; }
-
-    .btn-shop {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        background: var(--gradient);
-        color: white;
-        border-radius: 50px;
-        padding: 12px 28px;
-        font-size: 0.9rem;
-        font-weight: 600;
-        font-family: 'Syne', sans-serif;
-        text-decoration: none;
-        margin-top: 20px;
-        transition: opacity 0.2s, transform 0.2s;
-    }
-
-    .btn-shop:hover { opacity: 0.85; transform: translateY(-2px); color: white; }
+    .btn-checkout { width: 100%; border: 0; border-radius: 12px; margin-top: 16px; padding: 12px 14px; background: var(--gradient); color: #fff; font-family: 'Syne', sans-serif; font-weight: 700; }
+    .empty { text-align: center; padding: 70px 20px; color: var(--muted); }
 </style>
 
 <div class="page-header">
-    <div class="page-tag"><i class="fa-solid fa-cart-shopping"></i> Giỏ hàng</div>
-    <h1 class="page-title">Đơn hàng của bạn</h1>
+    <h1 class="page-title">Gio hang</h1>
 </div>
 
-{% if products %}
+{% if cart_items %}
 <div class="row g-4">
-    <!-- Cart Items -->
     <div class="col-lg-8">
         <div class="cart-box">
-            <div class="cart-box-header">
-                <h5>Sản phẩm trong giỏ</h5>
-                <span class="cart-count-badge">{{ products|length }} sản phẩm</span>
+            <div class="cart-head">
+                <h5>San pham trong gio</h5>
+                <span>{{ total_quantity }} mon</span>
             </div>
             <table class="cart-table">
                 <thead>
                     <tr>
-                        <th>Sản phẩm</th>
-                        <th>Đơn giá</th>
+                        <th>San pham</th>
+                        <th>Don gia</th>
+                        <th>Thanh tien</th>
                         <th></th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for p in products %}
+                    {% for item in cart_items %}
                     <tr>
                         <td>
                             <div class="product-cell">
-                                <div class="product-thumb">
-                                    <img src="{{ p.image_url or '' }}" 
-                                         alt="{{ p.name }}"
-                                         onerror="this.parentNode.innerHTML='📦';">
+                                <div class="thumb">
+                                    <img src="{{ item.product.image_url or '' }}" alt="{{ item.product.name }}">
                                 </div>
                                 <div>
-                                    <div class="product-cell-name">{{ p.name }}</div>
-                                    <div class="product-cell-sub">Chính hãng · Bảo hành 12 tháng</div>
+                                    <a href="{{ url_for('main.product_detail', id=item.product.id) }}" class="name text-decoration-none">{{ item.product.name }}</a>
+                                    {% if item.variant %}
+                                    <div class="variant">Model: {{ item.variant.label }}</div>
+                                    {% endif %}
+                                    <div class="qty">So luong: {{ item.quantity }}</div>
                                 </div>
                             </div>
                         </td>
+                        <td><span class="price">{{ "{:,.0f}".format(item.unit_price) }} d</span></td>
+                        <td><span class="price">{{ "{:,.0f}".format(item.subtotal) }} d</span></td>
                         <td>
-                            <span class="price-cell">{{ "{:,.0f}".format(p.price) }} đ</span>
-                        </td>
-                        <td>
-                            <a href="#" class="delete-btn">
-                                <i class="fa-solid fa-trash-can" style="font-size:0.8rem;"></i>
-                            </a>
+                            <form class="remove-form" action="{{ url_for('main.remove_from_cart', item_key=item.key) }}" method="post">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="btn-remove" title="Xoa san pham">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </form>
                         </td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
-
-        <div class="mt-3">
-            <a href="{{ url_for('main.index') }}" style="color:var(--muted); font-size:0.875rem; text-decoration:none; display:flex; align-items:center; gap:6px;">
-                <i class="fa-solid fa-arrow-left"></i> Tiếp tục mua sắm
-            </a>
-        </div>
     </div>
 
-    <!-- Order Summary -->
     <div class="col-lg-4">
         <div class="summary-box">
-            <div class="summary-title">
-                <i class="fa-solid fa-receipt me-2" style="color:var(--accent);"></i>
-                Tóm tắt đơn hàng
-            </div>
-
-            <div class="summary-row">
-                <span>Tạm tính ({{ products|length }} sản phẩm)</span>
-                <span>{{ "{:,.0f}".format(total) }} đ</span>
-            </div>
-            <div class="summary-row">
-                <span>Phí vận chuyển</span>
-                <span class="free-ship"><i class="fa-solid fa-truck-fast"></i> Miễn phí</span>
-            </div>
-
-            <div class="summary-row total">
-                <span>Tổng cộng</span>
-                <span class="amount">{{ "{:,.0f}".format(total) }} đ</span>
-            </div>
+            <div class="sum-title">Tom tat don hang</div>
+            <div class="sum-row"><span>So luong</span><span>{{ total_quantity }}</span></div>
+            <div class="sum-row"><span>Tam tinh</span><span>{{ "{:,.0f}".format(total) }} d</span></div>
+            <div class="sum-row"><span>Van chuyen</span><span>Mien phi</span></div>
+            <div class="sum-row total"><span>Tong cong</span><span>{{ "{:,.0f}".format(total) }} d</span></div>
 
             <form action="{{ url_for('main.checkout') }}" method="post">
-                {{ csrf_token() }}
-                <button type="submit" class="btn-checkout">
-                    <i class="fa-solid fa-lock"></i>
-                    Xác nhận thanh toán
-                </button>
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn-checkout">Xac nhan thanh toan</button>
             </form>
-
-            <div class="secure-badges">
-                <div class="secure-badge">
-                    <i class="fa-solid fa-shield-halved" style="color:#22c55e;"></i> Bảo mật 256-bit
-                </div>
-                <div class="secure-badge">
-                    <i class="fa-solid fa-rotate-left" style="color:var(--accent);"></i> Đổi trả 30 ngày
-                </div>
-            </div>
         </div>
     </div>
 </div>
-
 {% else %}
 <div class="cart-box">
-    <div class="empty-cart">
-        <div class="empty-cart-icon">
-            <i class="fa-solid fa-cart-xmark"></i>
-        </div>
-        <h4>Giỏ hàng đang trống</h4>
-        <p>Bạn chưa có sản phẩm nào trong giỏ hàng.<br>Khám phá ngay những sản phẩm tuyệt vời!</p>
-        <a href="{{ url_for('main.index') }}" class="btn-shop">
-            <i class="fa-solid fa-fire"></i> Mua sắm ngay
-        </a>
+    <div class="empty">
+        <i class="fa-solid fa-cart-shopping" style="font-size:2rem"></i>
+        <h4 class="mt-3">Gio hang dang trong</h4>
+        <a href="{{ url_for('main.index') }}" class="btn btn-primary mt-3">Quay lai mua sam</a>
     </div>
 </div>
 {% endif %}
+
 {% endblock %}

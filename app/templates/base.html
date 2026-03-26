@@ -329,12 +329,19 @@
                         <button type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
                     </form>
                 </div>
+                <a class="btn-login" href="{{ url_for('main.categories_page') }}">Category</a>
+                <a class="btn-login" href="{{ url_for('main.news_list') }}">Tin tuc</a>
                 <div class="nav-actions ms-auto">
                     <a class="cart-btn" href="{{ url_for('main.cart') }}" title="Giỏ hàng">
                         <i class="fa-solid fa-cart-shopping" style="font-size:1rem;"></i>
-                        {% set cart_count = session.get('cart', [])|length %}
+                        {% set cart_data = session.get('cart', {}) %}
+                        {% if cart_data is mapping %}
+                            {% set cart_count = cart_data.values()|sum %}
+                        {% else %}
+                            {% set cart_count = cart_data|length %}
+                        {% endif %}
                         {% if cart_count > 0 %}
-                        <span class="cart-badge">{{ cart_count }}</span>
+                        <span id="cartBadge" class="cart-badge">{{ cart_count }}</span>
                         {% endif %}
                     </a>
                     {% if current_user.is_authenticated %}
@@ -343,9 +350,29 @@
                                 <div class="user-avatar">{{ current_user.username[0].upper() }}</div>
                                 {{ current_user.username }}
                             </a>
-                            <ul class="dropdown-menu dropdown-menu-end">
+                                                        <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="{{ url_for('main.order_history') }}">
+                                    <i class="fa-solid fa-box-archive me-2 opacity-50"></i>Lich su don hang
+                                </a></li>
+                                {% if current_user.username|lower == config['ADMIN_USERNAME']|lower %}
+                                <li><a class="dropdown-item" href="{{ url_for('main.admin_dashboard') }}">
+                                    <i class="fa-solid fa-chart-line me-2 opacity-50"></i>Quan tri
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('main.admin_categories') }}">
+                                    <i class="fa-solid fa-tags me-2 opacity-50"></i>CRUD Category
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('main.admin_products') }}">
+                                    <i class="fa-solid fa-boxes-stacked me-2 opacity-50"></i>CRUD Product
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('main.admin_variants') }}">
+                                    <i class="fa-solid fa-layer-group me-2 opacity-50"></i>CRUD Variant
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('main.admin_news') }}">
+                                    <i class="fa-solid fa-newspaper me-2 opacity-50"></i>CRUD News
+                                </a></li>
+                                {% endif %}
                                 <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}">
-                                    <i class="fa-solid fa-right-from-bracket me-2 opacity-50"></i>Đăng xuất
+                                    <i class="fa-solid fa-right-from-bracket me-2 opacity-50"></i>Dang xuat
                                 </a></li>
                             </ul>
                         </div>
@@ -407,6 +434,63 @@
         </div>
     </footer>
 
+    <script>
+        document.addEventListener('submit', async (event) => {
+            const form = event.target;
+            if (!form.classList.contains('js-add-to-cart')) {
+                return;
+            }
+
+            event.preventDefault();
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const original = submitBtn ? submitBtn.innerHTML : '';
+
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+            }
+
+            try {
+                const formData = new FormData(form);
+                const res = await fetch(form.action, {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    },
+                    body: formData
+                });
+                const data = await res.json();
+
+                if (data && typeof data.cart_count === 'number') {
+                    const cartBtn = document.querySelector('.cart-btn');
+                    let badge = document.getElementById('cartBadge');
+                    if (data.cart_count > 0) {
+                        if (!badge && cartBtn) {
+                            badge = document.createElement('span');
+                            badge.id = 'cartBadge';
+                            badge.className = 'cart-badge';
+                            cartBtn.appendChild(badge);
+                        }
+                        if (badge) badge.textContent = data.cart_count;
+                    } else if (badge) {
+                        badge.remove();
+                    }
+                }
+            } catch (err) {
+                console.error(err);
+            } finally {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = original;
+                }
+            }
+        });
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
+
+
+
+

@@ -1,4 +1,13 @@
-<p>Chào {{ user.username }},</p>
-<p>Đơn hàng của bạn đã được tiếp nhận thành công.</p>
-<p>Cảm ơn bạn đã ủng hộ <strong>TECH STORE</strong>.</p>
-<p>Trân trọng,<br>Tech Store</p>
+<p>Chao {{ user.username }},</p>
+<p>Don hang <strong>#{{ '%06d'|format(order.id) }}</strong> cua ban da duoc tiep nhan thanh cong.</p>
+
+<p><strong>Chi tiet don hang:</strong></p>
+<ul>
+{% for item in order.items %}
+    <li>{{ item.product.name }}{% if item.variant_label %} ({{ item.variant_label }}){% endif %} x{{ item.quantity }} - {{ '{:,.0f}'.format(item.unit_price * item.quantity) }} d</li>
+{% endfor %}
+</ul>
+
+<p><strong>Tong thanh toan:</strong> {{ '{:,.0f}'.format(order.total_amount) }} d</p>
+<p>Cam on ban da ung ho <strong>TECH STORE</strong>.</p>
+<p>Tran trong,<br>Tech Store</p>
