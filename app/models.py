@@ -42,11 +42,18 @@ class ProductVariant(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False, index=True)
     label = db.Column(db.String(128), nullable=False)
+    name = db.Column(db.String(128), nullable=True)
+    description = db.Column(db.Text, nullable=True)
+    price = db.Column(db.Float, nullable=True)
+    color = db.Column(db.String(64), nullable=True)
+    image_url = db.Column(db.String(256), nullable=True)
     price_delta = db.Column(db.Float, nullable=False, default=0)
     stock = db.Column(db.Integer, nullable=False, default=0)
     sku = db.Column(db.String(64), unique=True, nullable=False, index=True)
 
     def final_price(self):
+        if self.price is not None:
+            return self.price
         return (self.product.price or 0) + (self.price_delta or 0)
 
 
@@ -67,7 +74,15 @@ class Order(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False, index=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False, index=True)
     total_amount = db.Column(db.Float, nullable=False)
-    status = db.Column(db.String(32), default='CONFIRMED', nullable=False)
+    status = db.Column(db.String(32), default='PROCESSING', nullable=False)
+    recipient_name = db.Column(db.String(120), nullable=True)
+    phone = db.Column(db.String(32), nullable=True)
+    city = db.Column(db.String(120), nullable=True)
+    ward = db.Column(db.String(120), nullable=True)
+    district = db.Column(db.String(120), nullable=True)
+    address_line = db.Column(db.String(255), nullable=True)
+    note = db.Column(db.Text, nullable=True)
+    payment_method = db.Column(db.String(64), nullable=True)
     items = db.relationship('OrderItem', backref='order', lazy='select', cascade='all, delete-orphan')
 
 

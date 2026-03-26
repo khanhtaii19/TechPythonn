@@ -107,7 +107,7 @@ def _resolve_variant(product, variant_id):
 
 def _price_for(product, variant):
     if variant:
-        return (product.price or 0) + (variant.price_delta or 0)
+        return variant.final_price()
     return product.price or 0
 
 
@@ -314,9 +314,25 @@ def search():
     )
 
 
-@bp.route('/checkout', methods=['POST'])
+@bp.route('/checkout/info')
 @login_required
-def checkout():
+def checkout_info():
+    cart_items, total, total_quantity = _build_cart_details()
+    if not cart_items:
+        flash('Gio hang trong!', 'warning')
+        return redirect(url_for('main.index'))
+    return render_template(
+        'checkout_info.html',
+        title='Thong tin dat hang',
+        cart_items=cart_items,
+        total=total,
+        total_quantity=total_quantity,
+    )
+
+
+@bp.route('/checkout/place', methods=['POST'])
+@login_required
+def checkout_place():
     cart_items, total, _ = _build_cart_details()
     if not cart_items:
         flash('Gio hang trong!', 'warning')
@@ -335,7 +351,32 @@ def checkout():
         flash('Khong du ton kho: ' + '; '.join(out_of_stock), 'danger')
         return redirect(url_for('main.cart'))
 
-    order = Order(user_id=current_user.id, total_amount=total)
+    recipient_name = (request.form.get('recipient_name') or '').strip()
+    phone = (request.form.get('phone') or '').strip()
+    city = (request.form.get('city') or '').strip()
+    district = (request.form.get('district') or '').strip()
+    ward = (request.form.get('ward') or '').strip()
+    address_line = (request.form.get('address_line') or '').strip()
+    note = (request.form.get('note') or '').strip()
+    payment_method = (request.form.get('payment_method') or '').strip()
+
+    if not recipient_name or not phone or not city or not district or not ward or not address_line or not payment_method:
+        flash('Vui long nhap day du thong tin giao hang va thanh toan.', 'danger')
+        return redirect(url_for('main.checkout_info'))
+
+    order = Order(
+        user_id=current_user.id,
+        total_amount=total,
+        status='PROCESSING',
+        recipient_name=recipient_name,
+        phone=phone,
+        city=city,
+        district=district,
+        ward=ward,
+        address_line=address_line,
+        note=note,
+        payment_method=payment_method,
+    )
     db.session.add(order)
     db.session.flush()
 
@@ -422,6 +463,30 @@ def admin_dashboard():
         total_orders_7d=total_orders_7d,
         inventory_products=inventory_products,
     )
+
+
+@bp.route('/admin/orders')
+@_admin_required
+def admin_orders():
+    orders = Order.query.order_by(Order.created_at.desc()).all()
+    status_options = ['PROCESSING', 'SHIPPING', 'DELIVERED', 'CANCELLED']
+    return render_template('admin_orders.html', title='Quan ly don hang', orders=orders, status_options=status_options)
+
+
+@bp.route('/admin/orders/<int:order_id>/status', methods=['POST'])
+@_admin_required
+def admin_order_update_status(order_id):
+    order = Order.query.get_or_404(order_id)
+    status = (request.form.get('status') or '').strip().upper()
+    allowed = {'PROCESSING', 'SHIPPING', 'DELIVERED', 'CANCELLED'}
+    if status not in allowed:
+        flash('Trang thai khong hop le.', 'danger')
+        return redirect(url_for('main.admin_orders'))
+
+    order.status = status
+    db.session.commit()
+    flash(f'Da cap nhat don #{order.id:06d} thanh {status}.', 'success')
+    return redirect(url_for('main.admin_orders'))
 
 
 @bp.route('/admin/categories', methods=['GET', 'POST'])
@@ -524,6 +589,11 @@ def admin_variants():
             variant = ProductVariant(
                 product_id=product_id,
                 label=label,
+                name=(request.form.get('name') or '').strip() or label,
+                description=(request.form.get('description') or '').strip(),
+                price=request.form.get('price', type=float),
+                color=(request.form.get('color') or '').strip(),
+                image_url=(request.form.get('image_url') or '').strip(),
                 price_delta=request.form.get('price_delta', type=float) or 0,
                 stock=request.form.get('stock', type=int) or 0,
                 sku=sku,
@@ -544,6 +614,11 @@ def admin_variant_update(variant_id):
     variant = ProductVariant.query.get_or_404(variant_id)
     variant.product_id = request.form.get('product_id', type=int) or variant.product_id
     variant.label = (request.form.get('label') or variant.label).strip()
+    variant.name = (request.form.get('name') or variant.name or variant.label).strip()
+    variant.description = (request.form.get('description') or '').strip()
+    variant.price = request.form.get('price', type=float)
+    variant.color = (request.form.get('color') or '').strip()
+    variant.image_url = (request.form.get('image_url') or '').strip()
     variant.price_delta = request.form.get('price_delta', type=float) or 0
     variant.stock = request.form.get('stock', type=int) or 0
     variant.sku = (request.form.get('sku') or variant.sku).strip()

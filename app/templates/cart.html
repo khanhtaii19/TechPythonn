@@ -97,10 +97,7 @@
             <div class="sum-row"><span>Van chuyen</span><span>Mien phi</span></div>
             <div class="sum-row total"><span>Tong cong</span><span>{{ "{:,.0f}".format(total) }} d</span></div>
 
-            <form action="{{ url_for('main.checkout') }}" method="post">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <button type="submit" class="btn-checkout">Xac nhan thanh toan</button>
-            </form>
+            <a href="{{ url_for('main.checkout_info') }}" class="btn-checkout text-center text-decoration-none d-block">Tiep tuc dat hang</a>
         </div>
     </div>
 </div>

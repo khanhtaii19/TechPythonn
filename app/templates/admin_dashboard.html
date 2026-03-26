@@ -33,6 +33,13 @@
 
 <div class="dash-head">
     <h1 class="dash-title">Quan tri kho va don hang</h1>
+    <div class="mt-2 d-flex gap-2 flex-wrap">
+        <a class="btn btn-outline-light btn-sm" href="{{ url_for('main.admin_orders') }}">Quan ly don hang</a>
+        <a class="btn btn-outline-light btn-sm" href="{{ url_for('main.admin_categories') }}">CRUD Category</a>
+        <a class="btn btn-outline-light btn-sm" href="{{ url_for('main.admin_products') }}">CRUD Product</a>
+        <a class="btn btn-outline-light btn-sm" href="{{ url_for('main.admin_variants') }}">CRUD Variant</a>
+        <a class="btn btn-outline-light btn-sm" href="{{ url_for('main.admin_news') }}">CRUD News</a>
+    </div>
 </div>
 
 <div class="row g-3">

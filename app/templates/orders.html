@@ -53,7 +53,9 @@
             </div>
             <div class="text-end">
                 <div class="muted">Trang thai</div>
-                <div>{{ order.status }}</div>
+                <div>
+                    {% if order.status == 'PROCESSING' %}Dang xu ly{% elif order.status == 'SHIPPING' %}Dang giao{% elif order.status == 'DELIVERED' %}Da giao{% elif order.status == 'CANCELLED' %}Da huy{% else %}{{ order.status }}{% endif %}
+                </div>
             </div>
         </div>
         <div class="total mt-2">{{ '{:,.0f}'.format(order.total_amount) }} d</div>

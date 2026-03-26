@@ -66,7 +66,11 @@
     <div class="col-lg-4">
         <div class="sum">
             <div class="sum-row"><span>Ngay dat</span><span>{{ order.created_at.strftime('%d/%m/%Y %H:%M') }}</span></div>
-            <div class="sum-row"><span>Trang thai</span><span>{{ order.status }}</span></div>
+            <div class="sum-row"><span>Trang thai</span><span>{% if order.status == 'PROCESSING' %}Dang xu ly{% elif order.status == 'SHIPPING' %}Dang giao{% elif order.status == 'DELIVERED' %}Da giao{% elif order.status == 'CANCELLED' %}Da huy{% else %}{{ order.status }}{% endif %}</span></div>
+            <div class="sum-row"><span>Thanh toan</span><span>{{ order.payment_method or '-' }}</span></div>
+            <div class="sum-row"><span>Nguoi nhan</span><span>{{ order.recipient_name or '-' }}</span></div>
+            <div class="sum-row"><span>So dien thoai</span><span>{{ order.phone or '-' }}</span></div>
+            <div class="sum-row"><span>Dia chi</span><span>{{ [order.address_line, order.ward, order.district, order.city]|select|join(', ') }}</span></div>
             <div class="sum-row total"><span>Tong thanh toan</span><span>{{ '{:,.0f}'.format(order.total_amount) }} d</span></div>
         </div>
     </div>

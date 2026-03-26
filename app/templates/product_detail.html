@@ -53,8 +53,8 @@
                 {% if product.variants %}
                 <select id="variantSelect" class="variant-select" name="variant_id">
                     {% for v in product.variants %}
-                    <option value="{{ v.id }}" data-stock="{{ v.stock }}" data-price="{{ (product.price + v.price_delta)|round(0) }}">
-                        {{ v.label }} - {{ '{:,.0f}'.format(product.price + v.price_delta) }} d (Con {{ v.stock }})
+                    <option value="{{ v.id }}" data-stock="{{ v.stock }}" data-price="{{ v.final_price()|round(0) }}">
+                        {{ v.name or v.label }}{% if v.color %} - {{ v.color }}{% endif %} - {{ '{:,.0f}'.format(v.final_price()) }} d (Con {{ v.stock }})
                     </option>
                     {% endfor %}
                 </select>

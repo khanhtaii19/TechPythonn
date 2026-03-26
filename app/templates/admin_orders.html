@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block content %}
+<style>
+  .panel{background:var(--card-bg);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:14px}
+  td,th{padding:8px 6px;border-bottom:1px solid var(--border)}
+</style>
+<div class="d-flex justify-content-between align-items-center mt-4 mb-3 flex-wrap gap-2">
+  <h2 style="font-family:'Syne',sans-serif;margin:0;">Quan ly don hang</h2>
+  <div>
+    <a class="btn btn-outline-light btn-sm" href="{{ url_for('main.admin_dashboard') }}">Dashboard</a>
+    <a class="btn btn-outline-light btn-sm" href="{{ url_for('main.admin_products') }}">Product</a>
+    <a class="btn btn-outline-light btn-sm" href="{{ url_for('main.admin_variants') }}">Variant</a>
+  </div>
+</div>
+
+<div class="panel">
+  <table class="w-100">
+    <thead>
+      <tr>
+        <th>Ma don</th>
+        <th>User</th>
+        <th>Thong tin giao hang</th>
+        <th>Thanh toan</th>
+        <th>Tong tien</th>
+        <th>Trang thai</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for o in orders %}
+      <tr>
+        <td>#{{ '%06d'|format(o.id) }}</td>
+        <td>{{ o.user.username if o.user else '-' }}</td>
+        <td>
+          <div>{{ o.recipient_name or '-' }} - {{ o.phone or '-' }}</div>
+          <div class="text-muted small">{{ [o.address_line, o.ward, o.district, o.city]|select|join(', ') }}</div>
+        </td>
+        <td>{{ o.payment_method or '-' }}</td>
+        <td>{{ '{:,.0f}'.format(o.total_amount) }} d</td>
+        <td>{{ o.status }}</td>
+        <td>
+          <form method="post" action="{{ url_for('main.admin_order_update_status', order_id=o.id) }}" class="d-flex gap-2">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <select class="form-control" name="status" style="max-width:140px">
+              {% for st in status_options %}
+              <option value="{{ st }}" {% if st == o.status %}selected{% endif %}>{{ st }}</option>
+              {% endfor %}
+            </select>
+            <button class="btn btn-sm btn-warning">Cap nhat</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

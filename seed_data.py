@@ -91,24 +91,35 @@ with app.app_context():
                 product.category_id = cat.id
 
             variants_data = [
-                ('Ban Tieu Chuan', 0, 12),
-                ('Mau Den', 150000, 10),
-                ('Mau Bac / Quoc Te', 300000, 8),
+                ('Ban Tieu Chuan', 'Ban tieu chuan', 0, 12, 'Xam'),
+                ('Mau Den', 'Phien ban mau den', 150000, 10, 'Den'),
+                ('Mau Bac / Quoc Te', 'Phien ban quoc te', 300000, 8, 'Bac'),
             ]
 
-            for v_idx, (label, delta, v_stock) in enumerate(variants_data, start=1):
+            for v_idx, (label, name, delta, v_stock, color) in enumerate(variants_data, start=1):
                 sku = f"{cat.slug[:4].upper()}-{product.id:04d}-V{v_idx}"
                 variant = ProductVariant.query.filter_by(sku=sku).first()
                 if not variant:
                     variant = ProductVariant(
                         product_id=product.id,
                         label=label,
+                        name=name,
+                        description=f'{name} cua {product_name}',
+                        price=base_price + delta,
+                        color=color,
+                        image_url=f"https://via.placeholder.com/600x400?text={product_name.replace(' ', '+')}+{name.replace(' ', '+')}",
                         price_delta=delta,
                         stock=v_stock,
                         sku=sku,
                     )
                     db.session.add(variant)
                     created_variants += 1
+                else:
+                    variant.name = name
+                    variant.description = f'{name} cua {product_name}'
+                    variant.price = base_price + delta
+                    variant.color = color
+                    variant.image_url = f"https://via.placeholder.com/600x400?text={product_name.replace(' ', '+')}+{name.replace(' ', '+')}"
 
             total_stock = sum(v[2] for v in variants_data)
             product.stock = total_stock
