@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from collections import deque
 from functools import wraps
 import re
 
@@ -177,34 +178,107 @@ def _products_payload(products):
     return payload
 
 
+def _representative_products(limit=25):
+    categories = Category.query.order_by(Category.name.asc()).all()
+    if not categories:
+        return Product.query.order_by(Product.id.desc()).limit(limit).all()
+
+    category_ids = [c.id for c in categories]
+    newest_products = (
+        Product.query.filter(Product.category_id.in_(category_ids))
+        .order_by(Product.id.desc())
+        .all()
+    )
+
+    buckets = {cid: deque() for cid in category_ids}
+    for product in newest_products:
+        if product.category_id in buckets:
+            buckets[product.category_id].append(product)
+
+    selected = []
+    seen_ids = set()
+    made_progress = True
+
+    # Round-robin across categories for balanced homepage representation.
+    while len(selected) < limit and made_progress:
+        made_progress = False
+        for cid in category_ids:
+            if not buckets[cid]:
+                continue
+            candidate = buckets[cid].popleft()
+            if candidate.id in seen_ids:
+                continue
+            selected.append(candidate)
+            seen_ids.add(candidate.id)
+            made_progress = True
+            if len(selected) >= limit:
+                break
+
+    if len(selected) < limit:
+        for product in Product.query.order_by(Product.id.desc()).all():
+            if product.id in seen_ids:
+                continue
+            selected.append(product)
+            seen_ids.add(product.id)
+            if len(selected) >= limit:
+                break
+
+    return selected
+
+
 @bp.route('/')
 @bp.route('/index')
 def index():
+    selected_category_id = request.args.get('category_id', type=int)
     selected_slug = request.args.get('category', '').strip().lower()
     categories = Category.query.order_by(Category.name.asc()).all()
     products_query = Product.query
 
-    if selected_slug:
+    if selected_category_id:
+        products_query = products_query.filter(Product.category_id == selected_category_id)
+    elif selected_slug:
         category = Category.query.filter_by(slug=selected_slug).first()
         if category:
             products_query = products_query.filter(Product.category_id == category.id)
 
-    products = products_query.order_by(Product.id.desc()).all()
+    if selected_slug:
+        products = products_query.order_by(Product.id.desc()).limit(25).all()
+    else:
+        products = _representative_products(limit=25)
 
     return render_template(
         'index.html',
         title='Cua hang Cong nghe',
         products=products,
         categories=categories,
+        selected_category_id=selected_category_id,
         selected_category_slug=selected_slug,
     )
 
 
 @bp.route('/categories')
 def categories_page():
+    selected_category_id = request.args.get('category_id', type=int)
+    selected_slug = request.args.get('category', '').strip().lower()
     categories = Category.query.order_by(Category.name.asc()).all()
-    featured = Product.query.order_by(Product.id.desc()).limit(24).all()
-    return render_template('categories.html', title='Danh muc', categories=categories, featured=featured)
+    featured_query = Product.query.order_by(Product.id.desc())
+
+    if selected_category_id:
+        featured_query = featured_query.filter(Product.category_id == selected_category_id)
+    elif selected_slug:
+        category = Category.query.filter_by(slug=selected_slug).first()
+        if category:
+            featured_query = featured_query.filter(Product.category_id == category.id)
+
+    featured = featured_query.limit(24).all()
+    return render_template(
+        'categories.html',
+        title='Danh muc',
+        categories=categories,
+        featured=featured,
+        selected_category_id=selected_category_id,
+        selected_category_slug=selected_slug,
+    )
 
 
 @bp.route('/categories/<slug>')
@@ -548,9 +622,17 @@ def admin_products():
             flash('Da tao product.', 'success')
         return redirect(url_for('main.admin_products'))
 
-    products = Product.query.order_by(Product.id.desc()).all()
+    page = request.args.get('page', 1, type=int)
+    per_page = 20
+    products_paginated = Product.query.order_by(Product.id.desc()).paginate(page=page, per_page=per_page, error_out=False)
     categories = Category.query.order_by(Category.name.asc()).all()
-    return render_template('admin_products.html', title='CRUD Product', products=products, categories=categories)
+    return render_template(
+        'admin_products.html',
+        title='CRUD Product',
+        products=products_paginated.items,
+        products_paginated=products_paginated,
+        categories=categories,
+    )
 
 
 @bp.route('/admin/products/<int:product_id>/update', methods=['POST'])

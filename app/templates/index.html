@@ -1,79 +1,260 @@
 {% extends 'base.html' %}
 {% block content %}
 <style>
-  .chip { border:1px solid var(--border); padding:6px 12px; border-radius:999px; color:var(--muted); text-decoration:none; }
-  .chip.active { background:var(--gradient); color:#fff; border-color:transparent; }
-  .toolbar { display:flex; gap:8px; flex-wrap:wrap; margin:20px 0; }
-  .card { background:var(--card-bg); border:1px solid var(--border); border-radius:14px; overflow:hidden; height:100%; }
-  .card img { width:100%; height:150px; object-fit:contain; background:var(--dark3); }
-  .body { padding:12px; display:flex; flex-direction:column; gap:8px; }
-  .name { color:var(--white); font-family:'Syne',sans-serif; text-decoration:none; }
-  .price { color:var(--accent); font-weight:700; }
-  .buy-row { margin-top:auto; display:grid; grid-template-columns:8fr 2fr; gap:8px; }
-  .btn-buy, .btn-add { border:0; border-radius:10px; padding:9px; font-family:'Syne',sans-serif; font-weight:700; }
-  .btn-buy { background:var(--gradient); color:#fff; }
-  .btn-add { background:rgba(255,77,28,.12); color:var(--accent); border:1px solid rgba(255,77,28,.3); }
+  .hero {
+    margin-top: 18px;
+    padding: 34px;
+    border-radius: 28px;
+    background:
+      radial-gradient(circle at 12% 20%, rgba(255, 140, 58, 0.28), transparent 45%),
+      radial-gradient(circle at 90% 10%, rgba(10, 163, 163, 0.2), transparent 40%),
+      linear-gradient(160deg, #0f2b46 0%, #143e61 60%, #17506f 100%);
+    color: #e9f5ff;
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--shadow-lg);
+  }
+
+  .hero::after {
+    content: '';
+    position: absolute;
+    width: 210px;
+    height: 210px;
+    border-radius: 30px;
+    border: 1px solid rgba(255, 255, 255, 0.24);
+    right: -52px;
+    bottom: -48px;
+    transform: rotate(24deg);
+  }
+
+  .hero-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.8rem;
+    padding: 7px 12px;
+    background: rgba(255, 255, 255, 0.14);
+    border-radius: 999px;
+  }
+
+  .hero h1 { margin-top: 12px; font-size: clamp(1.8rem, 4vw, 2.7rem); letter-spacing: -0.5px; max-width: 690px; }
+  .hero p { max-width: 620px; color: rgba(233, 245, 255, 0.9); margin: 10px 0 0; line-height: 1.7; }
+
+  .hero-metrics { margin-top: 20px; display: flex; flex-wrap: wrap; gap: 12px; }
+  .metric { background: rgba(255, 255, 255, 0.14); border: 1px solid rgba(255, 255, 255, 0.24); border-radius: 14px; padding: 10px 14px; min-width: 140px; }
+  .metric b { display: block; font-family: 'Space Grotesk', sans-serif; }
+  .metric span { font-size: 0.82rem; color: rgba(233, 245, 255, 0.86); }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 10px; margin: 22px 0 16px; }
+  .chip { border: 1px solid var(--line); background: #fff; color: var(--muted); border-radius: 999px; padding: 9px 14px; text-decoration: none; font-size: 0.88rem; font-weight: 600; transition: all 0.2s ease; }
+  .chip:hover { border-color: #b4cbe3; color: var(--text); }
+  .chip.active { border-color: transparent; background: var(--gradient-brand); color: #fff; box-shadow: var(--shadow-sm); }
+
+  .section-head { display: flex; justify-content: space-between; align-items: end; gap: 10px; margin: 12px 0 14px; }
+  .section-head h2 { margin: 0; font-size: 1.6rem; }
+  .section-head p { margin: 0; color: var(--muted); font-size: 0.9rem; }
+
+  .product-card {
+    height: 100%; border: 1px solid var(--line); border-radius: 18px; overflow: hidden;
+    background: #fff; display: flex; flex-direction: column; transition: all 0.25s ease;
+    box-shadow: 0 8px 28px rgba(30, 79, 124, 0.08);
+  }
+
+  .product-card:hover { transform: translateY(-5px); box-shadow: 0 18px 35px rgba(30, 79, 124, 0.16); border-color: #c7d8ea; }
+
+  .product-media {
+    height: 178px; background: linear-gradient(160deg, #f6f9ff 0%, #ecf4ff 100%);
+    display: flex; align-items: center; justify-content: center; padding: 16px; position: relative;
+  }
+
+  .product-media img { max-width: 100%; max-height: 146px; object-fit: contain; transition: transform 0.3s ease; }
+  .product-card:hover .product-media img { transform: scale(1.05); }
+
+  .btn-quick {
+    position: absolute; top: 10px; right: 10px; border: 1px solid #bfd1e4; background: rgba(255,255,255,0.92);
+    color: #1e5f91; border-radius: 10px; padding: 6px 9px; font-size: 0.8rem; font-weight: 700;
+  }
+
+  .product-body { padding: 14px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+  .product-name { text-decoration: none; font-family: 'Space Grotesk', sans-serif; font-size: 1.03rem; color: var(--text); line-height: 1.3; }
+  .product-meta { font-size: 0.8rem; color: var(--muted); }
+  .product-desc { font-size: 0.85rem; color: #45566b; line-height: 1.5; min-height: 40px; }
+  .product-price { margin-top: auto; font-family: 'Space Grotesk', sans-serif; font-size: 1.2rem; color: var(--brand); font-weight: 700; }
+
+  .actions { margin-top: 10px; display: grid; grid-template-columns: 7fr 3fr; gap: 8px; }
+  .btn-buy { border: 0; border-radius: 12px; padding: 10px; color: #fff; background: var(--gradient-brand); font-weight: 700; font-size: 0.88rem; }
+  .btn-add { border: 1px solid #bdd6ec; border-radius: 12px; background: #f6fbff; color: #1d6aa6; font-weight: 700; font-size: 0.95rem; }
+  .btn-soldout { border: 1px dashed #cfdae7; background: #f4f7fb; color: #90a2b6; border-radius: 12px; padding: 10px; font-weight: 700; }
+
+  .qv-img { width: 100%; height: 260px; object-fit: contain; background: linear-gradient(160deg, #f6f9ff 0%, #ecf4ff 100%); border-radius: 14px; }
+  .qv-price { color: var(--brand); font-size: 1.35rem; font-weight: 700; font-family: 'Space Grotesk', sans-serif; }
+
+  @media (max-width: 768px) {
+    .hero { padding: 24px; }
+    .actions { grid-template-columns: 1fr; }
+  }
 </style>
 
-<div class="d-flex justify-content-between align-items-center mt-4 flex-wrap gap-2">
-  <h2 style="font-family:'Syne',sans-serif; margin:0;">San Pham</h2>
-  <div class="toolbar" style="margin:0;">
-    <a class="chip" href="{{ url_for('main.categories_page') }}">Categories</a>
-    <a class="chip" href="{{ url_for('main.news_list') }}">Tin tuc</a>
+<section class="hero">
+  <span class="hero-kicker"><i class="fa-solid fa-sparkles"></i> New Collection 2026</span>
+  <h1>Không gian mua sắm công nghệ theo phong cách tối giản, hiện đại và dễ chọn.</h1>
+  <p>Từ smartphone, laptop đến phụ kiện, bạn có thể tìm nhanh theo danh mục, xem giá rõ ràng và đặt hàng trong vài bước.</p>
+  <div class="hero-metrics">
+    <div class="metric"><b>{{ products|length }}+</b><span>sản phẩm sẵn sàng</span></div>
+    <div class="metric"><b>{{ categories|length }} danh mục</b><span>chọn nhanh theo yêu cầu</span></div>
+    <div class="metric"><b>Giao diện mới</b><span>trực quan trên mobile và desktop</span></div>
+  </div>
+</section>
+
+<div class="section-head mt-4">
+  <div>
+    <h2>Sản phẩm nổi bật</h2>
+    <p>Lọc nhanh theo category và đặt mua trong 1 click.</p>
+  </div>
+  <div class="d-flex gap-2">
+    <a class="chip" href="{{ url_for('main.categories_page') }}">Xem category</a>
+    <a class="chip" href="{{ url_for('main.news_list') }}">Tin công nghệ</a>
   </div>
 </div>
 
-<div class="toolbar" id="categoryChips">
-  <a href="#" class="chip {% if not selected_category_slug %}active{% endif %}" data-slug="">Tat ca</a>
+<div class="chips" id="categoryChips">
+  <a href="#" class="chip {% if not selected_category_id and not selected_category_slug %}active{% endif %}" data-category-id="">Tất cả</a>
   {% for c in categories %}
-  <a href="#" class="chip {% if selected_category_slug == c.slug %}active{% endif %}" data-slug="{{ c.slug }}">{{ c.name }}</a>
+  <a href="#" class="chip {% if selected_category_id == c.id or selected_category_slug == c.slug %}active{% endif %}" data-category-id="{{ c.id }}">{{ c.name }}</a>
   {% endfor %}
 </div>
 
 <div class="row g-3" id="productGrid">
   {% for product in products %}
-  <div class="col-6 col-md-4 col-lg-3 product-item" data-cat="{{ product.category.slug if product.category else '' }}">
-    <div class="card">
-      <img src="{{ product.image_url or url_for('static', filename='default_tech.jpg') }}" alt="{{ product.name }}">
-      <div class="body">
-        <a class="name" href="{{ url_for('main.product_detail', id=product.id) }}">{{ product.name }}</a>
-        <div style="font-size:.8rem;color:var(--muted);">{{ product.category.name if product.category else '-' }}</div>
-        <div style="font-size:.8rem;color:var(--muted);">{{ product.description|truncate(64) }}</div>
-        <div class="price">{{ '{:,.0f}'.format(product.price) }} d</div>
+  <div class="col-12 col-sm-6 col-lg-4 col-xl-3 product-item" data-category-id="{{ product.category_id or '' }}">
+    <article class="product-card">
+      <div class="product-media">
+        <button
+          class="btn-quick js-quick-view"
+          type="button"
+          data-id="{{ product.id }}"
+          data-name="{{ product.name }}"
+          data-image="{{ product.image_url or url_for('static', filename='default_tech.jpg') }}"
+          data-price="{{ '{:,.0f}'.format(product.price) }} d"
+          data-description="{{ (product.description or '')|replace('"', '&quot;') }}"
+          data-detail-url="{{ url_for('main.product_detail', id=product.id) }}"
+          data-buy-url="{{ url_for('main.buy_now', id=product.id) }}"
+          data-cart-url="{{ url_for('main.add_to_cart', id=product.id) }}"
+        >
+          <i class="fa-regular fa-eye"></i>
+        </button>
+        <img src="{{ product.image_url or url_for('static', filename='default_tech.jpg') }}" alt="{{ product.name }}">
+      </div>
+      <div class="product-body">
+        <a class="product-name" href="{{ url_for('main.product_detail', id=product.id) }}">{{ product.name }}</a>
+        <div class="product-meta">{{ product.category.name if product.category else 'Khac' }}</div>
+        <div class="product-desc">{{ product.description|truncate(88) }}</div>
+        <div class="product-price">{{ '{:,.0f}'.format(product.price) }} d</div>
+
         {% if (product.stock or 0) > 0 %}
-        <div class="buy-row">
+        <div class="actions">
           <form action="{{ url_for('main.buy_now', id=product.id) }}" method="post">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <button class="btn-buy w-100" type="submit">Mua ngay</button>
+            <button class="btn-buy w-100" type="submit"><i class="fa-solid fa-bolt me-1"></i>Mua ngay</button>
           </form>
-          <form class="js-add-to-cart" action="{{ url_for('main.add_to_cart', id=product.id) }}" method="post">
+          <form
+            class="js-add-to-cart"
+            action="{{ url_for('main.add_to_cart', id=product.id) }}"
+            method="post"
+            data-item-name="{{ product.name }}"
+            data-item-image="{{ product.image_url or url_for('static', filename='default_tech.jpg') }}"
+            data-item-price="{{ '{:,.0f}'.format(product.price) }} d"
+          >
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button class="btn-add w-100" type="submit"><i class="fa-solid fa-cart-plus"></i></button>
           </form>
         </div>
         {% else %}
-        <button class="btn-add w-100" disabled>Het hang</button>
+        <button class="btn-soldout w-100" disabled>Hết hàng</button>
         {% endif %}
+      </div>
+    </article>
+  </div>
+  {% endfor %}
+</div>
+
+<div class="modal fade" id="quickViewModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content" style="border-radius:16px; border:1px solid var(--line)">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title" id="qvName"></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body pt-2">
+        <div class="row g-3">
+          <div class="col-md-5">
+            <img id="qvImage" class="qv-img" src="" alt="">
+          </div>
+          <div class="col-md-7 d-flex flex-column gap-2">
+            <div id="qvPrice" class="qv-price"></div>
+            <div id="qvDesc" style="color:#4f6278; line-height:1.7;"></div>
+            <div class="d-flex gap-2 mt-2">
+              <form id="qvBuyForm" method="post" style="flex:1">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button class="btn-buy w-100" type="submit"><i class="fa-solid fa-bolt me-1"></i>Mua ngay</button>
+              </form>
+              <form id="qvCartForm" class="js-add-to-cart" method="post" style="flex:1">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button class="btn-add w-100" type="submit"><i class="fa-solid fa-cart-plus me-1"></i>Thêm giỏ</button>
+              </form>
+            </div>
+            <a id="qvDetailLink" class="btn btn-outline-primary mt-2" href="#">Xem chi tiết</a>
+          </div>
+        </div>
       </div>
     </div>
   </div>
-  {% endfor %}
 </div>
 
 <script>
   document.querySelectorAll('#categoryChips .chip').forEach((chip) => {
     chip.addEventListener('click', (e) => {
       e.preventDefault();
-      const slug = chip.dataset.slug || '';
+      const categoryId = chip.dataset.categoryId || '';
       document.querySelectorAll('#categoryChips .chip').forEach((x) => x.classList.remove('active'));
       chip.classList.add('active');
 
       document.querySelectorAll('.product-item').forEach((item) => {
-        const ok = !slug || item.dataset.cat === slug;
+        const ok = !categoryId || item.dataset.categoryId === categoryId;
         item.style.display = ok ? '' : 'none';
       });
     });
   });
-</script>
 
+  (() => {
+    const modalEl = document.getElementById('quickViewModal');
+    if (!modalEl) return;
+    const modal = new bootstrap.Modal(modalEl);
+
+    const qvName = document.getElementById('qvName');
+    const qvImage = document.getElementById('qvImage');
+    const qvPrice = document.getElementById('qvPrice');
+    const qvDesc = document.getElementById('qvDesc');
+    const qvDetailLink = document.getElementById('qvDetailLink');
+    const qvBuyForm = document.getElementById('qvBuyForm');
+    const qvCartForm = document.getElementById('qvCartForm');
+
+    document.querySelectorAll('.js-quick-view').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        qvName.textContent = btn.dataset.name || '';
+        qvImage.src = btn.dataset.image || '';
+        qvImage.alt = btn.dataset.name || '';
+        qvPrice.textContent = btn.dataset.price || '';
+        qvDesc.textContent = btn.dataset.description || 'Thong tin san pham dang duoc cap nhat.';
+        qvDetailLink.href = btn.dataset.detailUrl || '#';
+        qvBuyForm.action = btn.dataset.buyUrl || '#';
+        qvCartForm.action = btn.dataset.cartUrl || '#';
+        qvCartForm.dataset.itemName = btn.dataset.name || '';
+        qvCartForm.dataset.itemImage = btn.dataset.image || '';
+        qvCartForm.dataset.itemPrice = btn.dataset.price || '';
+        modal.show();
+      });
+    });
+  })();
+</script>
 {% endblock %}

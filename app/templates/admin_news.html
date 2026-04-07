@@ -1,47 +1,103 @@
 {% extends 'base.html' %}
 {% block content %}
-<style>.panel{background:var(--card-bg);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:14px} td,th{padding:8px 6px;border-bottom:1px solid var(--border)}</style>
-<div class="d-flex justify-content-between align-items-center mt-4 mb-3 flex-wrap gap-2">
-  <h2 style="font-family:'Syne',sans-serif;margin:0;">CRUD News</h2>
-  <div>
-    <a class="btn btn-outline-light btn-sm" href="{{ url_for('main.admin_dashboard') }}">Dashboard</a>
-    <a class="btn btn-outline-light btn-sm" href="{{ url_for('main.admin_categories') }}">Category</a>
-    <a class="btn btn-outline-light btn-sm" href="{{ url_for('main.admin_products') }}">Product</a>
-    <a class="btn btn-outline-light btn-sm" href="{{ url_for('main.admin_variants') }}">Variant</a>
+<style>
+  .admin-head { margin-top: 22px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .admin-head h1 { margin: 0; font-size: clamp(1.5rem, 2.8vw, 1.9rem); }
+
+  .admin-nav { display: flex; gap: 8px; flex-wrap: wrap; }
+  .admin-nav a {
+    text-decoration: none;
+    border: 1px solid #c5d8ea;
+    color: #1d5f93;
+    background: #f5faff;
+    border-radius: 999px;
+    padding: 7px 12px;
+    font-size: 0.81rem;
+    font-weight: 700;
+  }
+
+  .panel {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 14px;
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 12px;
+    overflow: auto;
+  }
+
+  .form-control {
+    border: 1px solid #cdd9e6;
+    border-radius: 10px;
+    padding: 8px 10px;
+    font-size: 0.86rem;
+  }
+
+  table { width: 100%; border-collapse: collapse; min-width: 900px; }
+  td, th { padding: 10px 8px; border-bottom: 1px solid #e6eef7; vertical-align: top; }
+  th { color: #667f99; font-size: 0.77rem; text-transform: uppercase; letter-spacing: 0.4px; }
+
+  .btn-warning {
+    color: #fff;
+    border: none;
+    background: linear-gradient(135deg, #0e88ba 0%, #0aa3a3 100%);
+    font-size: 0.8rem;
+    border-radius: 9px;
+    padding: 8px 11px;
+    font-weight: 700;
+  }
+</style>
+
+<div class="admin-head">
+  <h1>CRUD News</h1>
+  <div class="admin-nav">
+    <a href="{{ url_for('main.admin_dashboard') }}">Dashboard</a>
+    <a href="{{ url_for('main.admin_categories') }}">Categories</a>
+    <a href="{{ url_for('main.admin_products') }}">Products</a>
+    <a href="{{ url_for('main.admin_variants') }}">Variants</a>
   </div>
 </div>
+
 <div class="panel">
   <form method="post" action="{{ url_for('main.admin_news') }}" class="row g-2">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <div class="col-md-6"><input class="form-control" name="title" placeholder="Title" required></div>
     <div class="col-md-6"><input class="form-control" name="slug" placeholder="Slug (de trong de tu tao)"></div>
     <div class="col-md-12"><input class="form-control" name="summary" placeholder="Summary"></div>
     <div class="col-md-12"><input class="form-control" name="image_url" placeholder="Image URL"></div>
     <div class="col-md-12"><textarea class="form-control" rows="3" name="content" placeholder="Content"></textarea></div>
-    <div class="col-12"><button class="btn btn-primary">Them bai viet</button></div>
+    <div class="col-12"><button class="btn btn-primary">Thêm bài viết</button></div>
   </form>
 </div>
-<div class="panel"><table class="w-100"><thead><tr><th>ID</th><th>Title</th><th>Slug</th><th></th></tr></thead><tbody>
-{% for n in posts %}
-<tr>
-<td>{{ n.id }}</td>
-<td>
-<form method="post" action="{{ url_for('main.admin_news_update', news_id=n.id) }}" class="d-flex gap-2 flex-wrap">
+
+<div class="panel">
+  <table>
+    <thead><tr><th>ID</th><th>Title</th><th>Slug</th><th></th></tr></thead>
+    <tbody>
+      {% for n in posts %}
+      <tr>
+        <td>{{ n.id }}</td>
+        <td>
+          <form method="post" action="{{ url_for('main.admin_news_update', news_id=n.id) }}" class="d-flex gap-2 flex-wrap">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-<input class="form-control" style="min-width:220px" name="title" value="{{ n.title }}">
-<input class="form-control" style="min-width:160px" name="slug" value="{{ n.slug }}">
-<input class="form-control" style="min-width:220px" name="summary" value="{{ n.summary }}">
-<input class="form-control" style="min-width:220px" name="image_url" value="{{ n.image_url }}">
-<input class="form-control" style="min-width:320px" name="content" value="{{ n.content }}">
-<button class="btn btn-sm btn-warning">Luu</button>
-</form>
-</td>
-<td>{{ n.slug }}</td>
-<td><form method="post" action="{{ url_for('main.admin_news_delete', news_id=n.id) }}">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn btn-sm btn-danger">Xoa</button></form></td>
-</tr>
-{% endfor %}
-</tbody></table></div>
+            <input class="form-control" style="min-width:220px" name="title" value="{{ n.title }}">
+            <input class="form-control" style="min-width:160px" name="slug" value="{{ n.slug }}">
+            <input class="form-control" style="min-width:220px" name="summary" value="{{ n.summary }}">
+            <input class="form-control" style="min-width:220px" name="image_url" value="{{ n.image_url }}">
+            <input class="form-control" style="min-width:320px" name="content" value="{{ n.content }}">
+            <button class="btn btn-warning">Lưu</button>
+          </form>
+        </td>
+        <td>{{ n.slug }}</td>
+        <td>
+          <form method="post" action="{{ url_for('main.admin_news_delete', news_id=n.id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn btn-sm btn-danger">Xóa</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
 {% endblock %}
-
-

@@ -1,18 +1,66 @@
 {% extends 'base.html' %}
 {% block content %}
-<style>.panel{background:var(--card-bg);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:14px} td,th{padding:8px 6px;border-bottom:1px solid var(--border)}</style>
-<div class="d-flex justify-content-between align-items-center mt-4 mb-3 flex-wrap gap-2">
-  <h2 style="font-family:'Syne',sans-serif;margin:0;">CRUD Variant (Model)</h2>
-  <div>
-    <a class="btn btn-outline-light btn-sm" href="{{ url_for('main.admin_dashboard') }}">Dashboard</a>
-    <a class="btn btn-outline-light btn-sm" href="{{ url_for('main.admin_orders') }}">Orders</a>
-    <a class="btn btn-outline-light btn-sm" href="{{ url_for('main.admin_products') }}">Product</a>
+<style>
+  .admin-head { margin-top: 22px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .admin-head h1 { margin: 0; font-size: clamp(1.5rem, 2.8vw, 1.9rem); }
+
+  .admin-nav { display: flex; gap: 8px; flex-wrap: wrap; }
+  .admin-nav a {
+    text-decoration: none;
+    border: 1px solid #c5d8ea;
+    color: #1d5f93;
+    background: #f5faff;
+    border-radius: 999px;
+    padding: 7px 12px;
+    font-size: 0.81rem;
+    font-weight: 700;
+  }
+
+  .panel {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 14px;
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 12px;
+    overflow: auto;
+  }
+
+  .form-control, .form-select {
+    border: 1px solid #cdd9e6;
+    border-radius: 10px;
+    padding: 8px 10px;
+    font-size: 0.86rem;
+  }
+
+  table { width: 100%; border-collapse: collapse; min-width: 980px; }
+  td, th { padding: 10px 8px; border-bottom: 1px solid #e6eef7; vertical-align: top; }
+  th { color: #667f99; font-size: 0.77rem; text-transform: uppercase; letter-spacing: 0.4px; }
+
+  .btn-warning {
+    color: #fff;
+    border: none;
+    background: linear-gradient(135deg, #0e88ba 0%, #0aa3a3 100%);
+    font-size: 0.8rem;
+    border-radius: 9px;
+    padding: 8px 11px;
+    font-weight: 700;
+  }
+</style>
+
+<div class="admin-head">
+  <h1>CRUD Variant (Model)</h1>
+  <div class="admin-nav">
+    <a href="{{ url_for('main.admin_dashboard') }}">Dashboard</a>
+    <a href="{{ url_for('main.admin_orders') }}">Orders</a>
+    <a href="{{ url_for('main.admin_products') }}">Products</a>
   </div>
 </div>
+
 <div class="panel">
   <form method="post" action="{{ url_for('main.admin_variants') }}" class="row g-2">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-    <div class="col-md-3"><select class="form-control" name="product_id" required>{% for p in products %}<option value="{{ p.id }}">{{ p.name }}</option>{% endfor %}</select></div>
+    <div class="col-md-3"><select class="form-select" name="product_id" required>{% for p in products %}<option value="{{ p.id }}">{{ p.name }}</option>{% endfor %}</select></div>
     <div class="col-md-3"><input class="form-control" name="label" placeholder="Nhan model" required></div>
     <div class="col-md-3"><input class="form-control" name="name" placeholder="Ten hien thi model"></div>
     <div class="col-md-3"><input class="form-control" name="color" placeholder="Mau sac"></div>
@@ -22,34 +70,40 @@
     <div class="col-md-3"><input class="form-control" name="sku" placeholder="SKU"></div>
     <div class="col-md-3"><input class="form-control" name="image_url" placeholder="Anh model"></div>
     <div class="col-12"><textarea class="form-control" name="description" rows="2" placeholder="Chi tiet model"></textarea></div>
-    <div class="col-12"><button class="btn btn-primary">Them model</button></div>
+    <div class="col-12"><button class="btn btn-primary">Thêm model</button></div>
   </form>
 </div>
-<div class="panel"><table class="w-100"><thead><tr><th>ID</th><th>Chinh sua</th><th>SKU</th><th>Gia</th><th>Stock</th><th></th></tr></thead><tbody>
-{% for v in variants %}
-<tr>
-<td>{{ v.id }}</td>
-<td>
-<form method="post" action="{{ url_for('main.admin_variant_update', variant_id=v.id) }}" class="d-flex gap-2 flex-wrap">
-<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-<select class="form-control" name="product_id" style="max-width:180px">{% for p in products %}<option value="{{ p.id }}" {% if v.product_id==p.id %}selected{% endif %}>{{ p.name }}</option>{% endfor %}</select>
-<input class="form-control" style="max-width:160px" name="label" value="{{ v.label }}">
-<input class="form-control" style="max-width:160px" name="name" value="{{ v.name or '' }}" placeholder="Ten model">
-<input class="form-control" style="max-width:120px" name="color" value="{{ v.color or '' }}" placeholder="Mau">
-<input class="form-control" style="max-width:110px" type="number" step="0.01" name="price" value="{{ v.price if v.price is not none else '' }}" placeholder="Gia">
-<input class="form-control" style="max-width:110px" type="number" step="0.01" name="price_delta" value="{{ v.price_delta }}" placeholder="Delta">
-<input class="form-control" style="max-width:90px" type="number" name="stock" value="{{ v.stock }}">
-<input class="form-control" style="max-width:140px" name="sku" value="{{ v.sku }}">
-<input class="form-control" style="min-width:180px" name="image_url" value="{{ v.image_url or '' }}" placeholder="Anh">
-<input class="form-control" style="min-width:220px" name="description" value="{{ v.description or '' }}" placeholder="Chi tiet">
-<button class="btn btn-sm btn-warning">Luu</button>
-</form>
-</td>
-<td>{{ v.sku }}</td>
-<td>{{ v.final_price() }}</td>
-<td>{{ v.stock }}</td>
-<td><form method="post" action="{{ url_for('main.admin_variant_delete', variant_id=v.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn btn-sm btn-danger">Xoa</button></form></td>
-</tr>
-{% endfor %}
-</tbody></table></div>
+
+<div class="panel">
+  <table>
+    <thead><tr><th>ID</th><th>Chỉnh sửa</th><th>SKU</th><th>Giá</th><th>Stock</th><th></th></tr></thead>
+    <tbody>
+      {% for v in variants %}
+      <tr>
+        <td>{{ v.id }}</td>
+        <td>
+          <form method="post" action="{{ url_for('main.admin_variant_update', variant_id=v.id) }}" class="d-flex gap-2 flex-wrap">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <select class="form-select" name="product_id" style="max-width:180px">{% for p in products %}<option value="{{ p.id }}" {% if v.product_id==p.id %}selected{% endif %}>{{ p.name }}</option>{% endfor %}</select>
+            <input class="form-control" style="max-width:160px" name="label" value="{{ v.label }}">
+            <input class="form-control" style="max-width:160px" name="name" value="{{ v.name or '' }}" placeholder="Ten model">
+            <input class="form-control" style="max-width:120px" name="color" value="{{ v.color or '' }}" placeholder="Mau">
+            <input class="form-control" style="max-width:110px" type="number" step="0.01" name="price" value="{{ v.price if v.price is not none else '' }}" placeholder="Gia">
+            <input class="form-control" style="max-width:110px" type="number" step="0.01" name="price_delta" value="{{ v.price_delta }}" placeholder="Delta">
+            <input class="form-control" style="max-width:90px" type="number" name="stock" value="{{ v.stock }}">
+            <input class="form-control" style="max-width:140px" name="sku" value="{{ v.sku }}">
+            <input class="form-control" style="min-width:180px" name="image_url" value="{{ v.image_url or '' }}" placeholder="Anh">
+            <input class="form-control" style="min-width:220px" name="description" value="{{ v.description or '' }}" placeholder="Chi tiet">
+            <button class="btn btn-warning">Lưu</button>
+          </form>
+        </td>
+        <td>{{ v.sku }}</td>
+        <td>{{ v.final_price() }}</td>
+        <td>{{ v.stock }}</td>
+        <td><form method="post" action="{{ url_for('main.admin_variant_delete', variant_id=v.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn btn-sm btn-danger">Xoa</button></form></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
 {% endblock %}

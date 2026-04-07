@@ -1,31 +1,76 @@
 {% extends 'base.html' %}
 {% block content %}
 <style>
-  .top { display:flex; justify-content:space-between; gap:8px; flex-wrap:wrap; margin:24px 0 16px; }
-  .nav a { margin-right:8px; }
-  .panel { background:var(--card-bg); border:1px solid var(--border); border-radius:14px; padding:14px; }
-  table { width:100%; }
-  td, th { padding:8px 6px; border-bottom:1px solid var(--border); }
+  .admin-head { margin-top: 22px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .admin-head h1 { margin: 0; font-size: clamp(1.5rem, 2.8vw, 1.9rem); }
+
+  .admin-nav { display: flex; gap: 8px; flex-wrap: wrap; }
+  .admin-nav a {
+    text-decoration: none;
+    border: 1px solid #c5d8ea;
+    color: #1d5f93;
+    background: #f5faff;
+    border-radius: 999px;
+    padding: 7px 12px;
+    font-size: 0.81rem;
+    font-weight: 700;
+  }
+
+  .panel {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 14px;
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 12px;
+    overflow: auto;
+  }
+
+  .form-control {
+    border: 1px solid #cdd9e6;
+    border-radius: 10px;
+    padding: 8px 10px;
+    font-size: 0.86rem;
+  }
+
+  table { width: 100%; border-collapse: collapse; }
+  td, th { padding: 10px 8px; border-bottom: 1px solid #e6eef7; }
+  th { color: #667f99; font-size: 0.77rem; text-transform: uppercase; letter-spacing: 0.4px; }
+
+  .btn-warning {
+    color: #fff;
+    border: none;
+    background: linear-gradient(135deg, #0e88ba 0%, #0aa3a3 100%);
+    font-size: 0.8rem;
+    border-radius: 9px;
+    padding: 8px 11px;
+    font-weight: 700;
+  }
 </style>
-<div class="top">
-  <h2 style="font-family:'Syne',sans-serif; margin:0;">CRUD Category</h2>
-  <div class="nav">
-    <a class="btn btn-outline-light btn-sm" href="{{ url_for('main.admin_dashboard') }}">Dashboard</a>
-    <a class="btn btn-outline-light btn-sm" href="{{ url_for('main.admin_products') }}">Product</a>
-    <a class="btn btn-outline-light btn-sm" href="{{ url_for('main.admin_variants') }}">Variant</a>
-    <a class="btn btn-outline-light btn-sm" href="{{ url_for('main.admin_news') }}">News</a>
+
+<div class="admin-head">
+  <h1>CRUD Category</h1>
+  <div class="admin-nav">
+    <a href="{{ url_for('main.admin_dashboard') }}">Dashboard</a>
+    <a href="{{ url_for('main.admin_products') }}">Products</a>
+    <a href="{{ url_for('main.admin_variants') }}">Variants</a>
+    <a href="{{ url_for('main.admin_news') }}">News</a>
   </div>
 </div>
-<div class="panel mb-3">
+
+<div class="panel">
   <form method="post" action="{{ url_for('main.admin_categories') }}" class="row g-2">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <div class="col-md-9"><input class="form-control" name="name" placeholder="Ten category" required></div>
-    <div class="col-md-3"><button class="btn btn-primary w-100">Them</button></div>
+    <div class="col-md-3"><button class="btn btn-primary w-100">Thêm</button></div>
   </form>
 </div>
+
 <div class="panel">
   <table>
-    <thead><tr><th>ID</th><th>Name</th><th>Slug</th><th></th></tr></thead>
+    <thead>
+      <tr><th>ID</th><th>Name</th><th>Slug</th><th></th></tr>
+    </thead>
     <tbody>
       {% for c in categories %}
       <tr>
@@ -34,14 +79,14 @@
           <form method="post" action="{{ url_for('main.admin_category_update', category_id=c.id) }}" class="d-flex gap-2">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <input class="form-control" name="name" value="{{ c.name }}">
-            <button class="btn btn-sm btn-warning">Luu</button>
+            <button class="btn btn-warning">Lưu</button>
           </form>
         </td>
         <td>{{ c.slug }}</td>
         <td>
           <form method="post" action="{{ url_for('main.admin_category_delete', category_id=c.id) }}">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <button class="btn btn-sm btn-danger">Xoa</button>
+            <button class="btn btn-sm btn-danger">Xóa</button>
           </form>
         </td>
       </tr>
@@ -50,5 +95,3 @@
   </table>
 </div>
 {% endblock %}
-
-

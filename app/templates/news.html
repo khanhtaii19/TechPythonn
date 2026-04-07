@@ -1,48 +1,84 @@
 {% extends 'base.html' %}
 {% block content %}
-
 <style>
-    .news-head { padding: 28px 0 12px; }
-    .news-title { font-family: 'Syne', sans-serif; color: var(--white); font-size: 1.9rem; }
+  .page-head {
+    margin-top: 22px;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
 
-    .news-card {
-        background: var(--card-bg);
-        border: 1px solid var(--border);
-        border-radius: 14px;
-        overflow: hidden;
-        height: 100%;
-    }
+  .page-head h1 { margin: 0; font-size: clamp(1.5rem, 2.9vw, 2rem); }
 
-    .news-card img { width: 100%; height: 200px; object-fit: cover; }
-    .news-body { padding: 14px; }
-    .news-body h5 { color: var(--white); font-family: 'Syne', sans-serif; font-size: 1.1rem; }
-    .news-body p { color: var(--muted); font-size: .9rem; }
-    .read-more { color: var(--accent); text-decoration: none; font-weight: 600; }
+  .news-card {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    overflow: hidden;
+    height: 100%;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.22s ease;
+  }
+
+  .news-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 18px 34px rgba(30, 79, 124, 0.16);
+  }
+
+  .news-card img {
+    width: 100%;
+    height: 210px;
+    object-fit: cover;
+  }
+
+  .news-body { padding: 14px; }
+  .news-body h5 { font-size: 1.08rem; margin: 6px 0; }
+  .news-body p { color: #4f6177; font-size: 0.9rem; line-height: 1.6; min-height: 58px; }
+  .meta { color: var(--muted); font-size: 0.8rem; }
+
+  .read-more {
+    color: #1d6aa6;
+    text-decoration: none;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .empty {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 30px;
+    color: var(--muted);
+  }
 </style>
 
-<div class="news-head d-flex justify-content-between align-items-center flex-wrap gap-2">
-    <h1 class="news-title">Trang Tin Tuc</h1><a class="btn btn-outline-light btn-sm" href="{{ url_for('main.index') }}">Ve trang chu</a>
+<div class="page-head">
+  <h1>Tin tức công nghệ</h1>
+  <a class="btn btn-outline-primary btn-sm" href="{{ url_for('main.index') }}">Về trang chủ</a>
 </div>
 
 <div class="row g-3">
-    {% for post in posts %}
-    <div class="col-md-6 col-lg-4">
-        <div class="news-card">
-            <img src="{{ post.image_url or 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=1200' }}" alt="{{ post.title }}">
-            <div class="news-body">
-                <div class="text-muted small mb-2">{{ post.published_at.strftime('%d/%m/%Y') }}</div>
-                <h5>{{ post.title }}</h5>
-                <p>{{ post.summary }}</p>
-                <a class="read-more" href="{{ url_for('main.news_detail', slug=post.slug) }}">Doc tiep</a>
-            </div>
-        </div>
-    </div>
-    {% else %}
-    <div class="col-12">
-        <p class="text-muted">Chua co bai viet tin tuc.</p>
-    </div>
-    {% endfor %}
+  {% for post in posts %}
+  <div class="col-md-6 col-xl-4">
+    <article class="news-card">
+      <img src="{{ post.image_url or 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=1200' }}" alt="{{ post.title }}">
+      <div class="news-body">
+        <div class="meta">{{ post.published_at.strftime('%d/%m/%Y') }}</div>
+        <h5>{{ post.title }}</h5>
+        <p>{{ post.summary }}</p>
+        <a class="read-more" href="{{ url_for('main.news_detail', slug=post.slug) }}">Đọc tiếp <i class="fa-solid fa-arrow-right"></i></a>
+      </div>
+    </article>
+  </div>
+  {% else %}
+  <div class="col-12">
+    <div class="empty">Chưa có bài viết tin tức.</div>
+  </div>
+  {% endfor %}
 </div>
-
 {% endblock %}
-

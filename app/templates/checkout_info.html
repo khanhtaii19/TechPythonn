@@ -1,56 +1,156 @@
 {% extends 'base.html' %}
 {% block content %}
 <style>
-  .head { padding: 30px 0 16px; }
-  .title { font-family:'Syne',sans-serif; color:var(--white); font-size:1.8rem; }
-  .panel { background:var(--card-bg); border:1px solid var(--border); border-radius:14px; padding:16px; }
-  .sum-row { display:flex; justify-content:space-between; color:var(--muted); padding:6px 0; }
-  .sum-row.total { border-top:1px solid var(--border); margin-top:8px; padding-top:12px; color:var(--white); font-weight:700; }
+  .page-head { margin-top: 22px; margin-bottom: 14px; }
+  .page-head h1 { margin: 0; font-size: clamp(1.5rem, 2.9vw, 2rem); }
+  .page-head p { margin: 8px 0 0; color: var(--muted); font-size: 0.92rem; }
+
+  .panel {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    box-shadow: var(--shadow-sm);
+    padding: 18px;
+  }
+
+  .field-label {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #556a82;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+
+  .form-control, .form-select {
+    border: 1px solid #cdd9e6;
+    border-radius: 12px;
+    padding: 11px 12px;
+    font-size: 0.92rem;
+    color: var(--text);
+  }
+
+  .form-control:focus, .form-select:focus {
+    border-color: #8fb3de;
+    box-shadow: 0 0 0 4px rgba(70, 131, 202, 0.14);
+  }
+
+  .panel-title {
+    margin-bottom: 12px;
+    font-size: 1.1rem;
+  }
+
+  .sum-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .sum-item {
+    background: #f8fbff;
+    border: 1px solid #e3edf7;
+    border-radius: 12px;
+    padding: 10px 11px;
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    font-size: 0.88rem;
+  }
+
+  .sum-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    color: var(--muted);
+    font-size: 0.92rem;
+  }
+
+  .sum-row.total {
+    margin-top: 8px;
+    padding-top: 10px;
+    border-top: 1px solid var(--line);
+    color: var(--text);
+    font-weight: 700;
+  }
+
+  .btn-primary {
+    padding: 12px 16px;
+    font-size: 0.92rem;
+  }
 </style>
 
-<div class="head">
-  <h1 class="title">Thong tin dat hang</h1>
+<div class="page-head">
+  <h1>Thông tin đặt hàng</h1>
+  <p>Hoàn tất thông tin giao nhận để xác nhận đơn hàng của bạn.</p>
 </div>
 
-<div class="row g-3">
+<div class="row g-4">
   <div class="col-lg-8">
     <div class="panel">
       <form method="post" action="{{ url_for('main.checkout_place') }}" class="row g-3">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-        <div class="col-md-6"><label class="form-label">Nguoi nhan</label><input class="form-control" name="recipient_name" required></div>
-        <div class="col-md-6"><label class="form-label">So dien thoai</label><input class="form-control" name="phone" required></div>
-        <div class="col-md-4"><label class="form-label">Thanh pho/Tinh</label><input class="form-control" name="city" required></div>
-        <div class="col-md-4"><label class="form-label">Quan/Huyen</label><input class="form-control" name="district" required></div>
-        <div class="col-md-4"><label class="form-label">Xa/Phuong</label><input class="form-control" name="ward" required></div>
-        <div class="col-12"><label class="form-label">Dia chi cu the</label><input class="form-control" name="address_line" required></div>
+        <div class="col-md-6">
+          <label class="field-label">Người nhận</label>
+          <input class="form-control" name="recipient_name" required>
+        </div>
+        <div class="col-md-6">
+          <label class="field-label">Số điện thoại</label>
+          <input class="form-control" name="phone" required>
+        </div>
+        <div class="col-md-4">
+          <label class="field-label">Thành phố/Tỉnh</label>
+          <input class="form-control" name="city" required>
+        </div>
+        <div class="col-md-4">
+          <label class="field-label">Quận/Huyện</label>
+          <input class="form-control" name="district" required>
+        </div>
+        <div class="col-md-4">
+          <label class="field-label">Xã/Phường</label>
+          <input class="form-control" name="ward" required>
+        </div>
+        <div class="col-12">
+          <label class="field-label">Địa chỉ cụ thể</label>
+          <input class="form-control" name="address_line" required>
+        </div>
 
         <div class="col-12">
-          <label class="form-label">Hinh thuc thanh toan</label>
-          <select class="form-control" name="payment_method" required>
-            <option value="">-- Chon hinh thuc --</option>
-            <option value="COD">Thanh toan khi nhan hang (COD)</option>
-            <option value="BANK_TRANSFER">Chuyen khoan ngan hang</option>
-            <option value="E_WALLET">Vi dien tu</option>
+          <label class="field-label">Hình thức thanh toán</label>
+          <select class="form-select" name="payment_method" required>
+            <option value="">-- Chọn hình thức --</option>
+            <option value="COD">Thanh toán khi nhận hàng (COD)</option>
+            <option value="BANK_TRANSFER">Chuyển khoản ngân hàng</option>
+            <option value="E_WALLET">Ví điện tử</option>
           </select>
         </div>
 
-        <div class="col-12"><label class="form-label">Ghi chu</label><textarea class="form-control" rows="3" name="note"></textarea></div>
+        <div class="col-12">
+          <label class="field-label">Ghi chú</label>
+          <textarea class="form-control" rows="3" name="note"></textarea>
+        </div>
 
-        <div class="col-12"><button class="btn btn-primary">Dat hang ngay</button></div>
+        <div class="col-12">
+          <button class="btn btn-primary"><i class="fa-solid fa-check me-2"></i>Đặt hàng ngay</button>
+        </div>
       </form>
     </div>
   </div>
 
   <div class="col-lg-4">
-    <div class="panel">
-      <h5 class="mb-3">Tom tat don</h5>
-      {% for item in cart_items %}
-      <div class="sum-row"><span>{{ item.product.name }}{% if item.variant %} ({{ item.variant.label }}){% endif %} x{{ item.quantity }}</span><span>{{ '{:,.0f}'.format(item.subtotal) }} d</span></div>
-      {% endfor %}
-      <div class="sum-row"><span>So luong</span><span>{{ total_quantity }}</span></div>
-      <div class="sum-row total"><span>Tong thanh toan</span><span>{{ '{:,.0f}'.format(total) }} d</span></div>
-    </div>
+    <aside class="panel">
+      <h3 class="panel-title">Tóm tắt đơn</h3>
+      <div class="sum-list">
+        {% for item in cart_items %}
+        <div class="sum-item">
+          <span>{{ item.product.name }}{% if item.variant %} ({{ item.variant.label }}){% endif %} x{{ item.quantity }}</span>
+          <b>{{ '{:,.0f}'.format(item.subtotal) }} d</b>
+        </div>
+        {% endfor %}
+      </div>
+      <div class="sum-row mt-2"><span>Số lượng</span><span>{{ total_quantity }}</span></div>
+      <div class="sum-row total"><span>Tổng thanh toán</span><span>{{ '{:,.0f}'.format(total) }} d</span></div>
+    </aside>
   </div>
 </div>
 {% endblock %}

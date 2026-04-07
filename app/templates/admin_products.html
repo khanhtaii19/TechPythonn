@@ -1,21 +1,94 @@
 {% extends 'base.html' %}
 {% block content %}
-<style>.panel{background:var(--card-bg);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:14px} td,th{padding:8px 6px;border-bottom:1px solid var(--border)}</style>
-<div class="d-flex justify-content-between align-items-center mt-4 mb-3 flex-wrap gap-2">
-  <h2 style="font-family:'Syne',sans-serif;margin:0;">CRUD Product</h2>
-  <div>
-    <a class="btn btn-outline-light btn-sm" href="{{ url_for('main.admin_dashboard') }}">Dashboard</a>
-    <a class="btn btn-outline-light btn-sm" href="{{ url_for('main.admin_categories') }}">Category</a>
-    <a class="btn btn-outline-light btn-sm" href="{{ url_for('main.admin_variants') }}">Variant</a>
-    <a class="btn btn-outline-light btn-sm" href="{{ url_for('main.admin_news') }}">News</a>
+<style>
+  .admin-head { margin-top: 22px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .admin-head h1 { margin: 0; font-size: clamp(1.5rem, 2.8vw, 1.9rem); }
+
+  .admin-nav { display: flex; gap: 8px; flex-wrap: wrap; }
+  .admin-nav a {
+    text-decoration: none;
+    border: 1px solid #c5d8ea;
+    color: #1d5f93;
+    background: #f5faff;
+    border-radius: 999px;
+    padding: 7px 12px;
+    font-size: 0.81rem;
+    font-weight: 700;
+  }
+
+  .panel {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 14px;
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 12px;
+    overflow: auto;
+  }
+
+  .form-control, .form-select {
+    border: 1px solid #cdd9e6;
+    border-radius: 10px;
+    padding: 8px 10px;
+    font-size: 0.86rem;
+  }
+
+  table { width: 100%; border-collapse: collapse; min-width: 980px; }
+  td, th { padding: 10px 8px; border-bottom: 1px solid #e6eef7; vertical-align: top; }
+  th { color: #667f99; font-size: 0.77rem; text-transform: uppercase; letter-spacing: 0.4px; }
+
+  .btn-warning {
+    color: #fff;
+    border: none;
+    background: linear-gradient(135deg, #0e88ba 0%, #0aa3a3 100%);
+    font-size: 0.8rem;
+    border-radius: 9px;
+    padding: 8px 11px;
+    font-weight: 700;
+  }
+
+  .pagination-wrap {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  .pagination-wrap a {
+    text-decoration: none;
+    border: 1px solid #c5d8ea;
+    color: #1d5f93;
+    background: #f5faff;
+    border-radius: 10px;
+    padding: 7px 10px;
+    font-size: 0.82rem;
+    font-weight: 700;
+  }
+
+  .pagination-wrap span {
+    color: var(--muted);
+    font-size: 0.85rem;
+    align-self: center;
+    margin-right: auto;
+  }
+</style>
+
+<div class="admin-head">
+  <h1>CRUD Product</h1>
+  <div class="admin-nav">
+    <a href="{{ url_for('main.admin_dashboard') }}">Dashboard</a>
+    <a href="{{ url_for('main.admin_categories') }}">Categories</a>
+    <a href="{{ url_for('main.admin_variants') }}">Variants</a>
+    <a href="{{ url_for('main.admin_news') }}">News</a>
   </div>
 </div>
+
 <div class="panel">
   <form method="post" action="{{ url_for('main.admin_products') }}" class="row g-2">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <div class="col-md-3"><input class="form-control" name="name" placeholder="Ten product" required></div>
     <div class="col-md-2">
-      <select class="form-control" name="category_id">
+      <select class="form-select" name="category_id">
         <option value="">Category</option>
         {% for c in categories %}<option value="{{ c.id }}">{{ c.name }}</option>{% endfor %}
       </select>
@@ -27,30 +100,61 @@
     <div class="col-12"><button class="btn btn-primary">Them product</button></div>
   </form>
 </div>
-<div class="panel"><table class="w-100"><thead><tr><th>ID</th><th>Name</th><th>Category</th><th>Price</th><th>Stock</th><th></th></tr></thead><tbody>
-{% for p in products %}
-<tr>
-<td>{{ p.id }}</td>
-<td><form method="post" action="{{ url_for('main.admin_product_update', product_id=p.id) }}" class="d-flex gap-2 flex-wrap">
+
+<div class="panel">
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Chinh sua</th>
+        <th>Category</th>
+        <th>Price</th>
+        <th>Stock</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in products %}
+      <tr>
+        <td>{{ p.id }}</td>
+        <td>
+          <form method="post" action="{{ url_for('main.admin_product_update', product_id=p.id) }}" class="d-flex gap-2 flex-wrap">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-<input class="form-control" style="min-width:160px" name="name" value="{{ p.name }}">
-<select class="form-control" name="category_id" style="max-width:160px">
-<option value="">-</option>{% for c in categories %}<option value="{{ c.id }}" {% if p.category_id==c.id %}selected{% endif %}>{{ c.name }}</option>{% endfor %}
-</select>
-<input class="form-control" style="max-width:120px" type="number" step="0.01" name="price" value="{{ p.price }}">
-<input class="form-control" style="max-width:100px" type="number" name="stock" value="{{ p.stock }}">
-<input class="form-control" style="min-width:200px" name="image_url" value="{{ p.image_url }}">
-<input class="form-control" style="min-width:220px" name="description" value="{{ p.description }}">
-<button class="btn btn-sm btn-warning">Luu</button>
-</form></td>
-<td>{{ p.category.name if p.category else '-' }}</td>
-<td>{{ p.price }}</td>
-<td>{{ p.stock }}</td>
-<td><form method="post" action="{{ url_for('main.admin_product_delete', product_id=p.id) }}">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn btn-sm btn-danger">Xoa</button></form></td>
-</tr>
-{% endfor %}
-</tbody></table></div>
+            <input class="form-control" style="min-width:160px" name="name" value="{{ p.name }}">
+            <select class="form-select" name="category_id" style="max-width:160px">
+              <option value="">-</option>{% for c in categories %}<option value="{{ c.id }}" {% if p.category_id==c.id %}selected{% endif %}>{{ c.name }}</option>{% endfor %}
+            </select>
+            <input class="form-control" style="max-width:120px" type="number" step="0.01" name="price" value="{{ p.price }}">
+            <input class="form-control" style="max-width:100px" type="number" name="stock" value="{{ p.stock }}">
+            <input class="form-control" style="min-width:200px" name="image_url" value="{{ p.image_url }}">
+            <input class="form-control" style="min-width:220px" name="description" value="{{ p.description }}">
+            <button class="btn btn-warning">Luu</button>
+          </form>
+        </td>
+        <td>{{ p.category.name if p.category else '-' }}</td>
+        <td>{{ p.price }}</td>
+        <td>{{ p.stock }}</td>
+        <td>
+          <form method="post" action="{{ url_for('main.admin_product_delete', product_id=p.id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn btn-sm btn-danger">Xoa</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  {% if products_paginated %}
+  <div class="pagination-wrap">
+    <span>Trang {{ products_paginated.page }} / {{ products_paginated.pages if products_paginated.pages > 0 else 1 }}</span>
+    {% if products_paginated.has_prev %}
+    <a href="{{ url_for('main.admin_products', page=products_paginated.prev_num) }}">Trang truoc</a>
+    {% endif %}
+    {% if products_paginated.has_next %}
+    <a href="{{ url_for('main.admin_products', page=products_paginated.next_num) }}">Trang sau</a>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>
 {% endblock %}
-
-

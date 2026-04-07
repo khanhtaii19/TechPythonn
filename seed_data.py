@@ -6,26 +6,26 @@ from app.models import Category, NewsArticle, Product, ProductVariant
 app = create_app()
 
 CATEGORY_NAMES = [
-    'Dien Thoai',
+    'Điện Thoại',
     'Laptop',
-    'May Tinh Bang',
-    'Dong Ho Thong Minh',
-    'Phu Kien',
+    'Máy Tính Bảng',
+    'Đồng Hồ Thông Minh',
+    'Phụ Kiện',
 ]
 
 PRODUCT_PREFIXES = {
-    'Dien Thoai': ['Nova', 'Prime', 'Ultra', 'Flex', 'Aero'],
-    'Laptop': ['WorkPro', 'ZenBook', 'GamingX', 'SlimAir', 'Creator'],
-    'May Tinh Bang': ['TabGo', 'TabPlus', 'Slate', 'PadOne', 'PadMax'],
-    'Dong Ho Thong Minh': ['WatchFit', 'TimeX', 'Pulse', 'Active', 'UltraWatch'],
-    'Phu Kien': ['Pods', 'Charge', 'Link', 'Stand', 'Grip'],
+    'Điện Thoại': ['Samsung Galaxy S26 Ultra', 'iPhone 17 Pro Max', 'Google Pixel 10 Pro', 'Samsung Galaxy Z Fold 7', 'OnePlus 15'],
+    'Laptop': ['MacBook Air M5', 'Dell XPS 14 (2026)', 'MacBook Pro 14/16 (M5 Pro/Max)', 'ASUS Zenbook S14', 'ASUS ROG Zephyrus G14 (2026)'],
+    'Máy Tính Bảng': ['iPad Pro M5 (OLED)', 'Samsung Galaxy Tab S11 Ultra', 'iPad Air M4 (2026)', 'Microsoft Surface Pro 12', 'OnePlus Pad 3'],
+    'Đồng Hồ Thông Minh': ['Apple Watch Series 11', 'Samsung Galaxy Watch 8', 'Apple Watch Ultra 3', 'Garmin Venu 4', 'Google Pixel Watch 4'],
+    'Phụ Kiện': ['Sony WH-1000XM6', 'Anker Nano 45W Charger', 'Logitech MX Master 3S (Gen 2)', 'Apple AirPods Pro (Gen 3)', 'Samsung T9 Portable SSD'],
 }
 
 NEWS_DATA = [
     {
-        'title': 'Xu huong cong nghe 2026: AI ca nhan hoa manh me',
+        'title': 'Xu hướng công nghệ 2026: Khi AI trở thành "Bản sao" kỹ thuật số',
         'slug': 'xu-huong-cong-nghe-2026-ai-ca-nhan-hoa',
-        'summary': 'AI duoc tich hop sau hon vao thiet bi ca nhan va trai nghiem mua sam.',
+        'summary': 'Bước sang năm 2026, trí tuệ nhân tạo (AI) không còn là một công cụ xa lạ trên đám mây mà đã thực sự "hòa tan" vào đời sống cá nhân qua các thiết bị đầu cuối. Trọng tâm của kỷ nguyên này chính là AI cá nhân hóa (Personalized AI).',
         'content': 'Trong nam 2026, AI tap trung vao tro ly ca nhan, toi uu pin va camera, va nang cao bao mat cho nguoi dung.',
     },
     {
@@ -80,7 +80,7 @@ with app.app_context():
                     name=product_name,
                     category_id=cat.id,
                     price=base_price,
-                    description=f"{product_name} la san pham chat luong cao trong danh muc {cat_name}.",
+                    description=f"{product_name} là sản phẩm chất lượng cao trong danh mục {cat_name}.",
                     image_url=f"https://via.placeholder.com/600x400?text={product_name.replace(' ', '+')}",
                     stock=30,
                 )
@@ -91,9 +91,9 @@ with app.app_context():
                 product.category_id = cat.id
 
             variants_data = [
-                ('Ban Tieu Chuan', 'Ban tieu chuan', 0, 12, 'Xam'),
-                ('Mau Den', 'Phien ban mau den', 150000, 10, 'Den'),
-                ('Mau Bac / Quoc Te', 'Phien ban quoc te', 300000, 8, 'Bac'),
+                ('Bản tiêu chuẩn', 'Bản tiêu chuẩn', 0, 12, 'Xám'),
+                ('Màu Đen', 'Phiên bản màu đen', 150000, 10, 'Đen'),
+                ('Màu Bạc / Quốc Tế', 'Phiên bản quốc tế', 300000, 8, 'Bạc'),
             ]
 
             for v_idx, (label, name, delta, v_stock, color) in enumerate(variants_data, start=1):
@@ -104,7 +104,7 @@ with app.app_context():
                         product_id=product.id,
                         label=label,
                         name=name,
-                        description=f'{name} cua {product_name}',
+                        description=f'{name} của {product_name}',
                         price=base_price + delta,
                         color=color,
                         image_url=f"https://via.placeholder.com/600x400?text={product_name.replace(' ', '+')}+{name.replace(' ', '+')}",
@@ -116,7 +116,7 @@ with app.app_context():
                     created_variants += 1
                 else:
                     variant.name = name
-                    variant.description = f'{name} cua {product_name}'
+                    variant.description = f'{name} của {product_name}'
                     variant.price = base_price + delta
                     variant.color = color
                     variant.image_url = f"https://via.placeholder.com/600x400?text={product_name.replace(' ', '+')}+{name.replace(' ', '+')}"

@@ -1,121 +1,306 @@
 {% extends 'base.html' %}
 {% block content %}
-
 <style>
-    .product-wrap { padding-top: 34px; }
-    .card-detail { background: var(--card-bg); border: 1px solid var(--border); border-radius: 20px; overflow: hidden; }
-    .media { background: var(--dark3); min-height: 380px; display: flex; align-items: center; justify-content: center; padding: 24px; }
-    .media img { width: 100%; max-height: 320px; object-fit: contain; }
+  .detail-shell { margin-top: 22px; }
 
-    .body { padding: 26px; }
-    .name { font-family: 'Syne', sans-serif; color: var(--white); font-weight: 800; font-size: 1.7rem; }
-    .desc { color: var(--muted); line-height: 1.7; margin: 14px 0 16px; }
-    .price { font-family: 'Syne', sans-serif; color: var(--accent); font-size: 1.8rem; font-weight: 800; }
+  .detail-card {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: var(--shadow-lg);
+  }
 
-    .variant-select {
-        width: 100%;
-        background: var(--dark3);
-        color: var(--text);
-        border: 1px solid var(--border);
-        border-radius: 10px;
-        padding: 10px 12px;
-        margin-top: 12px;
-    }
+  .media-pane {
+    background:
+      radial-gradient(circle at 15% 20%, rgba(255, 140, 58, 0.2), transparent 42%),
+      radial-gradient(circle at 85% 8%, rgba(10, 163, 163, 0.16), transparent 44%),
+      linear-gradient(165deg, #edf4ff 0%, #f9fbff 100%);
+    min-height: 430px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
 
-    .buy-split { margin-top: 16px; display: grid; grid-template-columns: 9fr 1fr; gap: 10px; }
-    .btn-buy, .btn-add { width: 100%; border: 0; border-radius: 12px; padding: 12px 14px; color: #fff; font-family: 'Syne', sans-serif; font-weight: 700; }
-    .btn-buy { background: var(--gradient); }
-    .btn-add { background: rgba(255, 77, 28, .22); border: 1px solid rgba(255,77,28,.55); }
+  .media-pane img {
+    max-width: 100%;
+    max-height: 360px;
+    object-fit: contain;
+    animation: floatIn 0.7s ease;
+  }
 
-    .btn-ghost { display: inline-flex; margin-top: 12px; border: 1px solid var(--border); border-radius: 12px; padding: 10px 16px; color: var(--text); text-decoration: none; }
+  @keyframes floatIn {
+    from { opacity: 0; transform: translateY(16px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
 
-    .section-title { font-family: 'Syne', sans-serif; color: var(--white); font-size: 1.1rem; margin: 28px 0 14px; }
-    .related-item { background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; padding: 12px; height: 100%; }
-    .related-item img { width: 100%; height: 140px; object-fit: contain; background: var(--dark3); border-radius: 10px; }
-    .related-name { margin-top: 10px; color: var(--white); font-family: 'Syne', sans-serif; font-size: .92rem; }
+  .info-pane { padding: 30px 28px; }
 
-    @media (max-width: 576px) { .buy-split { grid-template-columns: 1fr; } }
+  .breadcrumbs {
+    font-size: 0.84rem;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+
+  .name {
+    margin: 0;
+    font-size: clamp(1.6rem, 2.4vw, 2.2rem);
+    letter-spacing: -0.4px;
+  }
+
+  .price {
+    margin-top: 10px;
+    color: var(--brand);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+  }
+
+  .desc {
+    margin: 14px 0 16px;
+    color: #3d5066;
+    line-height: 1.72;
+    font-size: 0.95rem;
+  }
+
+  .variant-select {
+    width: 100%;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: #fff;
+    color: var(--text);
+    padding: 11px 12px;
+  }
+
+  .stock-hint {
+    margin-top: 8px;
+    font-size: 0.88rem;
+    color: var(--muted);
+  }
+
+  .buy-split {
+    margin-top: 14px;
+    display: grid;
+    grid-template-columns: 8fr 2fr;
+    gap: 10px;
+  }
+
+  .btn-buy {
+    border: 0;
+    border-radius: 12px;
+    padding: 12px 16px;
+    background: var(--gradient-brand);
+    color: #fff;
+    font-size: 0.92rem;
+    font-weight: 700;
+  }
+
+  .btn-add {
+    border: 1px solid #bdd6ec;
+    border-radius: 12px;
+    background: #f6fbff;
+    color: #1d6aa6;
+    font-size: 1rem;
+    font-weight: 700;
+  }
+
+  .btn-ghost {
+    display: inline-flex;
+    margin-top: 12px;
+    padding: 10px 14px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    text-decoration: none;
+    color: #27415d;
+    font-weight: 600;
+    background: #fff;
+  }
+
+  .section-title {
+    margin: 26px 0 12px;
+    font-size: 1.25rem;
+    letter-spacing: -0.3px;
+  }
+
+  .related-card {
+    height: 100%;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 12px;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.22s ease;
+  }
+
+  .related-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 30px rgba(30, 79, 124, 0.16);
+  }
+
+  .related-media {
+    height: 130px;
+    border-radius: 10px;
+    background: linear-gradient(160deg, #f6f9ff 0%, #ecf4ff 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+  }
+
+  .related-media img { max-width: 100%; max-height: 110px; object-fit: contain; }
+
+  .related-name {
+    margin-top: 10px;
+    font-family: 'Space Grotesk', sans-serif;
+    color: var(--text);
+    font-size: 0.94rem;
+  }
+
+  .related-price {
+    margin-top: 4px;
+    color: var(--brand);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+  }
+
+  @media (max-width: 576px) {
+    .buy-split { grid-template-columns: 1fr; }
+    .info-pane { padding: 22px; }
+  }
 </style>
 
-<div class="product-wrap">
-    <div class="row g-4 card-detail">
-        <div class="col-lg-5">
-            <div class="media">
-                <img src="{{ product.image_url or '' }}" alt="{{ product.name }}">
-            </div>
-        </div>
-        <div class="col-lg-7">
-            <div class="body">
-                <h1 class="name">{{ product.name }}</h1>
-                <div class="price">{{ "{:,.0f}".format(product.price) }} d</div>
-                <p class="desc">{{ product.description }}</p>
-
-                {% if product.variants %}
-                <select id="variantSelect" class="variant-select" name="variant_id">
-                    {% for v in product.variants %}
-                    <option value="{{ v.id }}" data-stock="{{ v.stock }}" data-price="{{ v.final_price()|round(0) }}">
-                        {{ v.name or v.label }}{% if v.color %} - {{ v.color }}{% endif %} - {{ '{:,.0f}'.format(v.final_price()) }} d (Con {{ v.stock }})
-                    </option>
-                    {% endfor %}
-                </select>
-                {% endif %}
-
-                {% set stock_num = product.stock or 0 %}
-                {% if stock_num > 0 or product.variants %}
-                <div class="buy-split">
-                    <form class="buy-form" action="{{ url_for('main.buy_now', id=product.id) }}" method="post">
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                        <input type="hidden" name="variant_id" value="{% if product.variants %}{{ product.variants[0].id }}{% endif %}">
-                        <button type="submit" class="btn-buy"><i class="fa-solid fa-bolt"></i> Mua ngay</button>
-                    </form>
-                    <form class="js-add-to-cart addcart-form" action="{{ url_for('main.add_to_cart', id=product.id) }}" method="post">
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                        <input type="hidden" name="variant_id" value="{% if product.variants %}{{ product.variants[0].id }}{% endif %}">
-                        <button type="submit" class="btn-add" title="Them vao gio"><i class="fa-solid fa-cart-plus"></i></button>
-                    </form>
-                </div>
-                {% else %}
-                <button class="btn-buy" disabled style="opacity:.5; margin-top:12px;">Het hang</button>
-                {% endif %}
-
-                <a class="btn-ghost" href="{{ url_for('main.index') }}">Quay lai danh sach</a>
-            </div>
-        </div>
+<div class="detail-shell">
+  <div class="row g-0 detail-card">
+    <div class="col-lg-5">
+      <div class="media-pane">
+        <img id="mainProductImage" src="{{ product.image_url or url_for('static', filename='default_tech.jpg') }}" alt="{{ product.name }}">
+      </div>
     </div>
+    <div class="col-lg-7">
+      <div class="info-pane">
+        <div class="breadcrumbs">Trang chu / San pham / Chi tiet</div>
+        <h1 class="name">{{ product.name }}</h1>
+        <div id="productPrice" class="price">{{ "{:,.0f}".format(product.price) }} d</div>
+        <p class="desc">{{ product.description }}</p>
 
-    {% if related_products %}
-    <div class="section-title">San pham lien quan</div>
-    <div class="row g-3">
-        {% for p in related_products %}
-        <div class="col-6 col-md-4 col-lg-3">
-            <a href="{{ url_for('main.product_detail', id=p.id) }}" class="text-decoration-none">
-                <div class="related-item">
-                    <img src="{{ p.image_url or '' }}" alt="{{ p.name }}">
-                    <div class="related-name">{{ p.name }}</div>
-                    <div class="price" style="font-size:1rem;">{{ "{:,.0f}".format(p.price) }} d</div>
-                </div>
-            </a>
+        {% if product.variants %}
+        <select id="variantSelect" class="variant-select" name="variant_id">
+          {% for v in product.variants %}
+          <option
+            value="{{ v.id }}"
+            data-stock="{{ v.stock }}"
+            data-price="{{ v.final_price()|round(0) }}"
+            data-image="{{ v.image_url or '' }}"
+          >
+            {{ v.name or v.label }}{% if v.color %} - {{ v.color }}{% endif %} - {{ '{:,.0f}'.format(v.final_price()) }} d (Con {{ v.stock }})
+          </option>
+          {% endfor %}
+        </select>
+        <div id="variantStockHint" class="stock-hint"></div>
+        {% endif %}
+
+        {% set stock_num = product.stock or 0 %}
+        {% if stock_num > 0 or product.variants %}
+        <div class="buy-split">
+          <form class="buy-form" action="{{ url_for('main.buy_now', id=product.id) }}" method="post">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="variant_id" value="{% if product.variants %}{{ product.variants[0].id }}{% endif %}">
+            <button type="submit" class="btn-buy"><i class="fa-solid fa-bolt me-1"></i>Mua ngay</button>
+          </form>
+          <form
+            class="js-add-to-cart addcart-form"
+            action="{{ url_for('main.add_to_cart', id=product.id) }}"
+            method="post"
+            data-item-name="{{ product.name }}"
+            data-item-image="{{ product.image_url or url_for('static', filename='default_tech.jpg') }}"
+            data-item-price="{{ '{:,.0f}'.format(product.price) }} d"
+          >
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="variant_id" value="{% if product.variants %}{{ product.variants[0].id }}{% endif %}">
+            <button type="submit" class="btn-add" title="Them vao gio"><i class="fa-solid fa-cart-plus"></i></button>
+          </form>
         </div>
-        {% endfor %}
+        {% else %}
+        <button class="btn-buy mt-2" disabled style="opacity: .55;">Het hang</button>
+        {% endif %}
+
+        <a class="btn-ghost" href="{{ url_for('main.index') }}"><i class="fa-solid fa-arrow-left me-2"></i>Quay lai danh sach</a>
+      </div>
     </div>
-    {% endif %}
+  </div>
+
+  {% if related_products %}
+  <h3 class="section-title">San pham lien quan</h3>
+  <div class="row g-3">
+    {% for p in related_products %}
+    <div class="col-6 col-md-4 col-lg-3">
+      <a href="{{ url_for('main.product_detail', id=p.id) }}" class="text-decoration-none">
+        <article class="related-card">
+          <div class="related-media">
+            <img src="{{ p.image_url or '' }}" alt="{{ p.name }}">
+          </div>
+          <div class="related-name">{{ p.name }}</div>
+          <div class="related-price">{{ "{:,.0f}".format(p.price) }} d</div>
+        </article>
+      </a>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
 </div>
 
 <script>
-    (() => {
-        const select = document.getElementById('variantSelect');
-        if (!select) return;
+  (() => {
+    const select = document.getElementById('variantSelect');
+    if (!select) return;
 
-        const syncVariantInput = () => {
-            const value = select.value;
-            document.querySelectorAll('input[name="variant_id"]').forEach((el) => {
-                el.value = value;
-            });
-        };
+    const imageEl = document.getElementById('mainProductImage');
+    const priceEl = document.getElementById('productPrice');
+    const stockHintEl = document.getElementById('variantStockHint');
+    const defaultImage = "{{ product.image_url or url_for('static', filename='default_tech.jpg') }}";
+    const buyButton = document.querySelector('.buy-form button[type="submit"]');
+    const addButton = document.querySelector('.addcart-form button[type="submit"]');
 
-        select.addEventListener('change', syncVariantInput);
-        syncVariantInput();
-    })();
+    const formatPrice = (value) => {
+      const num = Number(value || 0);
+      return `${num.toLocaleString('vi-VN')} d`;
+    };
+
+    const syncVariantUI = () => {
+      const value = select.value;
+      const selected = select.selectedOptions && select.selectedOptions[0] ? select.selectedOptions[0] : null;
+
+      document.querySelectorAll('input[name="variant_id"]').forEach((el) => {
+        el.value = value;
+      });
+
+      if (!selected) return;
+
+      const image = selected.dataset.image || defaultImage;
+      const price = selected.dataset.price || '0';
+      const stock = Number(selected.dataset.stock || '0');
+
+      if (imageEl) imageEl.src = image || defaultImage;
+      if (priceEl) priceEl.textContent = formatPrice(price);
+      const addcartForm = document.querySelector('.addcart-form');
+      if (addcartForm) {
+        addcartForm.dataset.itemImage = image || defaultImage;
+        addcartForm.dataset.itemPrice = formatPrice(price);
+      }
+
+      if (stockHintEl) {
+        stockHintEl.textContent = stock > 0 ? `Con ${stock} san pham` : 'Model nay dang het hang';
+      }
+
+      const isAvailable = stock > 0;
+      if (buyButton) buyButton.disabled = !isAvailable;
+      if (addButton) addButton.disabled = !isAvailable;
+    };
+
+    select.addEventListener('change', syncVariantUI);
+    syncVariantUI();
+  })();
 </script>
-
 {% endblock %}

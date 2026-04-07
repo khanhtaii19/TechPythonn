@@ -1,74 +1,95 @@
 {% extends 'base.html' %}
 {% block content %}
-
 <style>
-    .page-head { padding: 32px 0 18px; }
-    .page-title { font-family: 'Syne', sans-serif; color: var(--white); font-size: 1.8rem; }
+  .page-head { margin-top: 22px; margin-bottom: 12px; }
+  .page-head h1 { margin: 0; font-size: clamp(1.5rem, 2.9vw, 2rem); }
+  .page-head p { margin: 8px 0 0; color: var(--muted); font-size: 0.92rem; }
 
-    .order-card {
-        background: var(--card-bg);
-        border: 1px solid var(--border);
-        border-radius: 16px;
-        padding: 18px;
-        margin-bottom: 14px;
-    }
+  .order-card {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 16px;
+    margin-bottom: 12px;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.2s ease;
+  }
 
-    .row-top { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
-    .order-id { font-family: 'Syne', sans-serif; color: var(--white); font-weight: 700; }
-    .muted { color: var(--muted); font-size: .88rem; }
-    .total { color: var(--accent); font-family: 'Syne', sans-serif; font-size: 1.15rem; font-weight: 700; }
+  .order-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 16px 30px rgba(30, 79, 124, 0.15);
+  }
 
-    .btn-view {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        border: 1px solid var(--border);
-        border-radius: 10px;
-        color: var(--text);
-        text-decoration: none;
-        padding: 8px 12px;
-        margin-top: 10px;
-    }
+  .row-top { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .order-id { font-family: 'Space Grotesk', sans-serif; font-size: 1.06rem; }
+  .muted { color: var(--muted); font-size: 0.88rem; }
+  .total { color: var(--brand); font-family: 'Space Grotesk', sans-serif; font-size: 1.2rem; font-weight: 700; }
 
-    .empty {
-        background: var(--card-bg);
-        border: 1px solid var(--border);
-        border-radius: 16px;
-        text-align: center;
-        padding: 60px 20px;
-    }
+  .status-badge {
+    border-radius: 999px;
+    padding: 5px 10px;
+    font-size: 0.76rem;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+  }
+
+  .st-processing { color: #9a6700; background: #fff4cf; }
+  .st-shipping { color: #0c5b8f; background: #dff3ff; }
+  .st-delivered { color: #166534; background: #def7e7; }
+  .st-cancelled { color: #991b1b; background: #fee2e2; }
+
+  .btn-view {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid #c8d8e8;
+    border-radius: 11px;
+    color: #1b5f95;
+    text-decoration: none;
+    padding: 8px 12px;
+    margin-top: 10px;
+    font-weight: 700;
+    background: #f5faff;
+  }
+
+  .empty {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    text-align: center;
+    padding: 62px 20px;
+    box-shadow: var(--shadow-sm);
+  }
 </style>
 
 <div class="page-head">
-    <h1 class="page-title">Lich su don hang</h1>
+  <h1>Lịch sử đơn hàng</h1>
+  <p>Theo dõi tất cả đơn bạn đã đặt cùng trạng thái xử lý mới nhất.</p>
 </div>
 
 {% if orders %}
-    {% for order in orders %}
-    <div class="order-card">
-        <div class="row-top">
-            <div>
-                <div class="order-id">Don #{{ '%06d'|format(order.id) }}</div>
-                <div class="muted">{{ order.created_at.strftime('%d/%m/%Y %H:%M') }}</div>
-            </div>
-            <div class="text-end">
-                <div class="muted">Trang thai</div>
-                <div>
-                    {% if order.status == 'PROCESSING' %}Dang xu ly{% elif order.status == 'SHIPPING' %}Dang giao{% elif order.status == 'DELIVERED' %}Da giao{% elif order.status == 'CANCELLED' %}Da huy{% else %}{{ order.status }}{% endif %}
-                </div>
-            </div>
+  {% for order in orders %}
+  <article class="order-card">
+    <div class="row-top">
+      <div>
+        <div class="order-id">Đơn #{{ '%06d'|format(order.id) }}</div>
+        <div class="muted">{{ order.created_at.strftime('%d/%m/%Y %H:%M') }}</div>
+      </div>
+      <div class="text-end">
+        <div class="muted mb-1">Trạng thái</div>
+        <div>
+          {% if order.status == 'PROCESSING' %}<span class="status-badge st-processing">Đang xử lý</span>{% elif order.status == 'SHIPPING' %}<span class="status-badge st-shipping">Đang giao</span>{% elif order.status == 'DELIVERED' %}<span class="status-badge st-delivered">Đã giao</span>{% elif order.status == 'CANCELLED' %}<span class="status-badge st-cancelled">Đã hủy</span>{% else %}<span class="status-badge">{{ order.status }}</span>{% endif %}
         </div>
-        <div class="total mt-2">{{ '{:,.0f}'.format(order.total_amount) }} d</div>
-        <a class="btn-view" href="{{ url_for('main.order_detail', order_id=order.id) }}">
-            <i class="fa-solid fa-file-invoice"></i> Xem chi tiet
-        </a>
+      </div>
     </div>
-    {% endfor %}
+    <div class="total mt-2">{{ '{:,.0f}'.format(order.total_amount) }} d</div>
+    <a class="btn-view" href="{{ url_for('main.order_detail', order_id=order.id) }}"><i class="fa-solid fa-file-invoice"></i>Xem chi tiết</a>
+  </article>
+  {% endfor %}
 {% else %}
-    <div class="empty">
-        <h4>Ban chua co don hang nao</h4>
-        <a href="{{ url_for('main.index') }}" class="btn btn-primary mt-3">Mua sam ngay</a>
-    </div>
+  <div class="empty">
+    <h4>Bạn chưa có đơn hàng nào</h4>
+    <a href="{{ url_for('main.index') }}" class="btn btn-primary mt-3">Mua sắm ngay</a>
+  </div>
 {% endif %}
-
 {% endblock %}

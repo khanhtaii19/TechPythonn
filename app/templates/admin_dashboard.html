@@ -1,125 +1,146 @@
 {% extends 'base.html' %}
 {% block content %}
-
 <style>
-    .dash-head { padding: 32px 0 20px; }
-    .dash-title { font-family: 'Syne', sans-serif; color: var(--white); font-size: 1.9rem; }
+  .admin-head { margin-top: 22px; margin-bottom: 14px; }
+  .admin-head h1 { margin: 0; font-size: clamp(1.55rem, 2.9vw, 2rem); }
 
-    .metric {
-        background: var(--card-bg);
-        border: 1px solid var(--border);
-        border-radius: 14px;
-        padding: 16px;
-        height: 100%;
-    }
+  .admin-nav {
+    margin-top: 10px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
 
-    .metric .label { color: var(--muted); font-size: .82rem; text-transform: uppercase; letter-spacing: .5px; }
-    .metric .value { font-family: 'Syne', sans-serif; color: var(--accent); font-size: 2rem; font-weight: 800; margin-top: 6px; }
+  .admin-nav a {
+    text-decoration: none;
+    border: 1px solid #c5d8ea;
+    color: #1d5f93;
+    background: #f5faff;
+    border-radius: 999px;
+    padding: 7px 12px;
+    font-size: 0.82rem;
+    font-weight: 700;
+  }
 
-    .panel {
-        background: var(--card-bg);
-        border: 1px solid var(--border);
-        border-radius: 14px;
-        padding: 16px;
-        margin-top: 14px;
-    }
+  .metric {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 16px;
+    box-shadow: var(--shadow-sm);
+    height: 100%;
+  }
 
-    .chart-wrap { height: 280px; }
+  .metric .label { color: #5e7692; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.4px; }
+  .metric .value { margin-top: 6px; font-size: 2rem; color: var(--brand); font-family: 'Space Grotesk', sans-serif; font-weight: 700; }
 
-    .stock-table { width: 100%; border-collapse: collapse; }
-    .stock-table th, .stock-table td { border-bottom: 1px solid var(--border); padding: 10px 6px; }
-    .stock-table th { color: var(--muted); font-size: .78rem; text-transform: uppercase; }
+  .panel {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    box-shadow: var(--shadow-sm);
+    padding: 16px;
+  }
+
+  .chart-wrap { height: 290px; }
+
+  .stock-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .stock-table th, .stock-table td {
+    border-bottom: 1px solid #e6eef7;
+    padding: 10px 8px;
+    font-size: 0.9rem;
+  }
+
+  .stock-table th {
+    color: #667f99;
+    font-size: 0.77rem;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
 </style>
 
-<div class="dash-head">
-    <h1 class="dash-title">Quan tri kho va don hang</h1>
-    <div class="mt-2 d-flex gap-2 flex-wrap">
-        <a class="btn btn-outline-light btn-sm" href="{{ url_for('main.admin_orders') }}">Quan ly don hang</a>
-        <a class="btn btn-outline-light btn-sm" href="{{ url_for('main.admin_categories') }}">CRUD Category</a>
-        <a class="btn btn-outline-light btn-sm" href="{{ url_for('main.admin_products') }}">CRUD Product</a>
-        <a class="btn btn-outline-light btn-sm" href="{{ url_for('main.admin_variants') }}">CRUD Variant</a>
-        <a class="btn btn-outline-light btn-sm" href="{{ url_for('main.admin_news') }}">CRUD News</a>
-    </div>
+<div class="admin-head">
+  <h1>Quản trị kho và đơn hàng</h1>
+  <div class="admin-nav">
+    <a href="{{ url_for('main.admin_orders') }}">Quản lý đơn hàng</a>
+    <a href="{{ url_for('main.admin_categories') }}">Categories</a>
+    <a href="{{ url_for('main.admin_products') }}">Products</a>
+    <a href="{{ url_for('main.admin_variants') }}">Variants</a>
+    <a href="{{ url_for('main.admin_news') }}">News</a>
+  </div>
 </div>
 
 <div class="row g-3">
-    <div class="col-md-4">
-        <div class="metric">
-            <div class="label">Don hang 7 ngay</div>
-            <div class="value">{{ total_orders_7d }}</div>
-        </div>
+  <div class="col-md-4">
+    <div class="metric">
+      <div class="label">Đơn hàng 7 ngày</div>
+      <div class="value">{{ total_orders_7d }}</div>
     </div>
-    <div class="col-md-8">
-        <div class="panel">
-            <h6 class="mb-3">Tien do don hang 7 ngay gan nhat</h6>
-            <div class="chart-wrap">
-                <canvas id="ordersChart"></canvas>
-            </div>
-        </div>
+  </div>
+  <div class="col-md-8">
+    <div class="panel">
+      <h6 class="mb-3">Tiến độ đơn hàng 7 ngày gần nhất</h6>
+      <div class="chart-wrap">
+        <canvas id="ordersChart"></canvas>
+      </div>
     </div>
+  </div>
 </div>
 
-<div class="panel">
-    <h6 class="mb-3">Ton kho hien tai</h6>
-    <table class="stock-table">
-        <thead>
-            <tr>
-                <th>Danh muc</th>
-                <th>San pham</th>
-                <th>Ton kho</th>
-                <th>So model</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for p in inventory_products %}
-            <tr>
-                <td>{{ p.category.name if p.category else '-' }}</td>
-                <td>{{ p.name }}</td>
-                <td>
-                    {% if p.variants %}
-                        {{ p.variants | map(attribute='stock') | sum }}
-                    {% else %}
-                        {{ p.stock }}
-                    {% endif %}
-                </td>
-                <td>{{ p.variants|length }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+<div class="panel mt-3">
+  <h6 class="mb-3">Tồn kho hiện tại</h6>
+  <table class="stock-table">
+    <thead>
+      <tr>
+        <th>Danh mục</th>
+        <th>Sản phẩm</th>
+        <th>Tồn kho</th>
+        <th>Số model</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in inventory_products %}
+      <tr>
+        <td>{{ p.category.name if p.category else '-' }}</td>
+        <td>{{ p.name }}</td>
+        <td>{% if p.variants %}{{ p.variants | map(attribute='stock') | sum }}{% else %}{{ p.stock }}{% endif %}</td>
+        <td>{{ p.variants|length }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    const ctx = document.getElementById('ordersChart');
-    if (ctx) {
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: {{ labels|tojson }},
-                datasets: [{
-                    label: 'So don',
-                    data: {{ values|tojson }},
-                    borderColor: '#ff6b35',
-                    backgroundColor: 'rgba(255,107,53,0.15)',
-                    fill: true,
-                    tension: 0.35,
-                    pointRadius: 4,
-                    pointHoverRadius: 6
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: {
-                    y: { beginAtZero: true, ticks: { stepSize: 1 } }
-                }
-            }
-        });
-    }
+  const ctx = document.getElementById('ordersChart');
+  if (ctx) {
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: {{ labels|tojson }},
+        datasets: [{
+          label: 'So don',
+          data: {{ values|tojson }},
+          borderColor: '#ff6b35',
+          backgroundColor: 'rgba(255,107,53,0.15)',
+          fill: true,
+          tension: 0.35,
+          pointRadius: 4,
+          pointHoverRadius: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+      }
+    });
+  }
 </script>
-
 {% endblock %}
-
-

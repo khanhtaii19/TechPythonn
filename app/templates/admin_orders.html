@@ -1,29 +1,85 @@
 {% extends 'base.html' %}
 {% block content %}
 <style>
-  .panel{background:var(--card-bg);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:14px}
-  td,th{padding:8px 6px;border-bottom:1px solid var(--border)}
+  .admin-head { margin-top: 22px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .admin-head h1 { margin: 0; font-size: clamp(1.5rem, 2.8vw, 1.9rem); }
+
+  .admin-nav { display: flex; gap: 8px; flex-wrap: wrap; }
+  .admin-nav a {
+    text-decoration: none;
+    border: 1px solid #c5d8ea;
+    color: #1d5f93;
+    background: #f5faff;
+    border-radius: 999px;
+    padding: 7px 12px;
+    font-size: 0.81rem;
+    font-weight: 700;
+  }
+
+  .panel {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 14px;
+    box-shadow: var(--shadow-sm);
+    overflow: auto;
+  }
+
+  table { width: 100%; border-collapse: collapse; min-width: 950px; }
+  td, th { padding: 10px 8px; border-bottom: 1px solid #e6eef7; vertical-align: top; }
+  th { color: #667f99; font-size: 0.77rem; text-transform: uppercase; letter-spacing: 0.4px; }
+
+  .form-control, .form-select {
+    border: 1px solid #cdd9e6;
+    border-radius: 10px;
+    padding: 8px 10px;
+    font-size: 0.86rem;
+  }
+
+  .btn-warning {
+    color: #fff;
+    border: none;
+    background: linear-gradient(135deg, #0e88ba 0%, #0aa3a3 100%);
+    font-size: 0.8rem;
+    border-radius: 9px;
+    padding: 8px 11px;
+    font-weight: 700;
+  }
+
+  .status-pill {
+    display: inline-block;
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-size: 0.74rem;
+    font-weight: 700;
+  }
+
+  .st-processing { color: #9a6700; background: #fff4cf; }
+  .st-shipping { color: #0c5b8f; background: #dff3ff; }
+  .st-delivered { color: #166534; background: #def7e7; }
+  .st-cancelled { color: #991b1b; background: #fee2e2; }
 </style>
-<div class="d-flex justify-content-between align-items-center mt-4 mb-3 flex-wrap gap-2">
-  <h2 style="font-family:'Syne',sans-serif;margin:0;">Quan ly don hang</h2>
-  <div>
-    <a class="btn btn-outline-light btn-sm" href="{{ url_for('main.admin_dashboard') }}">Dashboard</a>
-    <a class="btn btn-outline-light btn-sm" href="{{ url_for('main.admin_products') }}">Product</a>
-    <a class="btn btn-outline-light btn-sm" href="{{ url_for('main.admin_variants') }}">Variant</a>
+
+<div class="admin-head">
+  <h1>Quản lý đơn hàng</h1>
+  <div class="admin-nav">
+    <a href="{{ url_for('main.admin_dashboard') }}">Dashboard</a>
+    <a href="{{ url_for('main.admin_products') }}">Products</a>
+    <a href="{{ url_for('main.admin_variants') }}">Variants</a>
   </div>
 </div>
 
 <div class="panel">
-  <table class="w-100">
+  <table>
     <thead>
       <tr>
-        <th>Ma don</th>
+        <th>Mã đơn</th>
         <th>User</th>
-        <th>Thong tin giao hang</th>
-        <th>Thanh toan</th>
-        <th>Tong tien</th>
-        <th>Trang thai</th>
-        <th></th>
+        <th>Thông tin giao hàng</th>
+        <th>Thanh toán</th>
+        <th>Tổng tiền</th>
+        <th>Trạng thái</th>
+        <th>Cập nhật</th>
       </tr>
     </thead>
     <tbody>
@@ -36,17 +92,19 @@
           <div class="text-muted small">{{ [o.address_line, o.ward, o.district, o.city]|select|join(', ') }}</div>
         </td>
         <td>{{ o.payment_method or '-' }}</td>
-        <td>{{ '{:,.0f}'.format(o.total_amount) }} d</td>
-        <td>{{ o.status }}</td>
+        <td><b>{{ '{:,.0f}'.format(o.total_amount) }} d</b></td>
+        <td>
+          {% if o.status == 'PROCESSING' %}<span class="status-pill st-processing">PROCESSING</span>{% elif o.status == 'SHIPPING' %}<span class="status-pill st-shipping">SHIPPING</span>{% elif o.status == 'DELIVERED' %}<span class="status-pill st-delivered">DELIVERED</span>{% elif o.status == 'CANCELLED' %}<span class="status-pill st-cancelled">CANCELLED</span>{% else %}<span class="status-pill">{{ o.status }}</span>{% endif %}
+        </td>
         <td>
           <form method="post" action="{{ url_for('main.admin_order_update_status', order_id=o.id) }}" class="d-flex gap-2">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <select class="form-control" name="status" style="max-width:140px">
+            <select class="form-select" name="status" style="max-width:150px">
               {% for st in status_options %}
               <option value="{{ st }}" {% if st == o.status %}selected{% endif %}>{{ st }}</option>
               {% endfor %}
             </select>
-            <button class="btn btn-sm btn-warning">Cap nhat</button>
+            <button class="btn btn-warning">Lưu</button>
           </form>
         </td>
       </tr>
